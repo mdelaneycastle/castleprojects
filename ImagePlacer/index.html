@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artwork Preview</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Artwork Preview</h1>
+        </header>
+
+        <main class="main-content">
+            <!-- Left Panel: Controls -->
+            <aside class="control-panel">
+                <!-- Upload Section -->
+                <section class="control-section upload-section">
+                    <h2>Upload Artwork</h2>
+                    <div class="upload-area" id="upload-dropzone">
+                        <input type="file" id="artwork-input" accept="image/*" hidden>
+                        <label for="artwork-input" class="upload-label">
+                            <span class="upload-icon">+</span>
+                            <span>Click or drag to upload</span>
+                        </label>
+                    </div>
+                    <div class="artwork-preview-thumb" id="artwork-thumb"></div>
+                </section>
+
+                <!-- Size Input Section -->
+                <section class="control-section size-section">
+                    <h2>Artwork Size</h2>
+                    <div class="size-input-group">
+                        <label for="artwork-width">Width (cm):</label>
+                        <input type="number" id="artwork-width" min="1" max="500" step="1" placeholder="Enter width">
+                    </div>
+                    <div class="size-category" id="size-category">
+                        Category: <span>--</span>
+                    </div>
+                </section>
+
+                <!-- Shadow Controls -->
+                <section class="control-section shadow-section">
+                    <h2>Shadow Direction</h2>
+                    <div class="rotation-wheel-container">
+                        <div class="rotation-wheel" id="rotation-wheel">
+                            <div class="wheel-indicator" id="wheel-indicator"></div>
+                            <div class="wheel-center"></div>
+                        </div>
+                        <div class="rotation-value">
+                            <span id="rotation-degrees">135</span>&deg;
+                        </div>
+                    </div>
+                    <div class="shadow-slider">
+                        <label for="shadow-distance">Shadow Distance:</label>
+                        <input type="range" id="shadow-distance" min="0" max="100" value="40">
+                    </div>
+                    <div class="shadow-slider">
+                        <label for="shadow-opacity">Shadow Intensity:</label>
+                        <input type="range" id="shadow-opacity" min="0" max="100" value="50">
+                    </div>
+                </section>
+
+                <!-- Action Buttons -->
+                <section class="control-section action-section">
+                    <button class="btn btn-primary" id="export-btn" disabled>
+                        Export as PNG
+                    </button>
+                    <button class="btn btn-secondary" id="reset-btn">
+                        Reset
+                    </button>
+                </section>
+            </aside>
+
+            <!-- Right Panel: Canvas Preview -->
+            <div class="preview-area">
+                <div class="canvas-container" id="canvas-container">
+                    <canvas id="preview-canvas"></canvas>
+                    <div class="placeholder-message" id="placeholder-message">
+                        Upload an artwork and enter its width to preview
+                    </div>
+                </div>
+                <div class="preview-info">
+                    <span id="background-info">No background loaded</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/imageUpload.js"></script>
+    <script src="js/backgroundManager.js"></script>
+    <script src="js/shadowController.js"></script>
+    <script src="js/dragHandler.js"></script>
+    <script src="js/artworkRenderer.js"></script>
+    <script src="js/exportManager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
