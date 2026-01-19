@@ -9,19 +9,19 @@ const CONFIG = {
     // Background configurations with real-world wall widths (in cm)
     backgrounds: {
         small: {
-            path: 'Small.png',
+            path: 'Small.jpg',
             wallWidthCm: 200
         },
         medium: {
-            path: 'Medium.png',
+            path: 'NewMed.jpg',
             wallWidthCm: 260
         },
         large_wide: {
-            path: 'Large-Wide.png',
+            path: 'Large-Wide.jpg',
             wallWidthCm: 500
         },
         large_tall: {
-            path: 'Large-Tall.png',
+            path: 'Large-Tall.jpg',
             wallWidthCm: 500
         }
     },
