@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frames & Slips | Gallery Reference Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-card: #141414;
+            --bg-card-hover: #1a1a1a;
+            --text-primary: #f5f0e8;
+            --text-secondary: #a09a90;
+            --accent-gold: #c9a962;
+            --accent-gold-dim: #8a7544;
+            --border-subtle: rgba(201, 169, 98, 0.15);
+            --border-hover: rgba(201, 169, 98, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Subtle noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            z-index: 1000;
+        }
+
+        /* Header */
+        header {
+            padding: 3rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-subtle);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(201, 169, 98, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .logo-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-text span {
+            color: var(--accent-gold);
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        .tagline {
+            font-size: 0.85rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-subtle);
+            background: rgba(20, 20, 20, 0.5);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .filter-btn {
+            padding: 0.6rem 1.4rem;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+            background: rgba(201, 169, 98, 0.05);
+        }
+
+        /* Search */
+        .search-container {
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-gold);
+        }
+
+        /* Main Grid */
+        main {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .frames-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Frame Card */
+        .frame-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .frame-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
+                        0 0 0 1px rgba(201, 169, 98, 0.1);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .frame-card:nth-child(1) { animation-delay: 0.1s; }
+        .frame-card:nth-child(2) { animation-delay: 0.15s; }
+        .frame-card:nth-child(3) { animation-delay: 0.2s; }
+        .frame-card:nth-child(4) { animation-delay: 0.25s; }
+        .frame-card:nth-child(5) { animation-delay: 0.3s; }
+        .frame-card:nth-child(6) { animation-delay: 0.35s; }
+
+        .frame-image-container {
+            position: relative;
+            height: 280px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .frame-image-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(201, 169, 98, 0.03) 0%, transparent 70%);
+        }
+
+        .frame-image {
+            max-width: 85%;
+            max-height: 85%;
+            object-fit: contain;
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+        }
+
+        .frame-card:hover .frame-image {
+            transform: scale(1.05);
+        }
+
+        .frame-code-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 10;
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid var(--accent-gold-dim);
+            padding: 0.4rem 0.8rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--accent-gold);
+        }
+
+        .supplier-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+            background: rgba(10, 10, 10, 0.95);
+            padding: 0.3rem 0.6rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .larson-supplier .supplier-badge {
+            border: 1px solid var(--accent-gold-dim);
+            color: var(--accent-gold);
+        }
+
+        .lion-supplier .supplier-badge {
+            border: 1px solid #6b8e7b;
+            color: #8fb89f;
+        }
+
+        .lion-supplier .frame-code-badge {
+            border-color: #6b8e7b;
+            color: #8fb89f;
+        }
+
+        .lion-supplier:hover {
+            border-color: rgba(107, 142, 123, 0.4);
+        }
+
+        .lion-supplier .frame-link {
+            border-color: #6b8e7b;
+            color: #8fb89f;
+        }
+
+        .lion-supplier .frame-link:hover {
+            background: #8fb89f;
+            color: var(--bg-primary);
+        }
+
+        .frame-content {
+            padding: 1.5rem;
+        }
+
+        .frame-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .frame-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .frame-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .meta-tag {
+            padding: 0.3rem 0.7rem;
+            background: rgba(201, 169, 98, 0.1);
+            border: 1px solid var(--border-subtle);
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+        }
+
+        .frame-alternatives {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .frame-alternatives strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .frame-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding: 0.7rem 1.2rem;
+            background: transparent;
+            border: 1px solid var(--accent-gold-dim);
+            color: var(--accent-gold);
+            text-decoration: none;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .frame-link:hover {
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+        }
+
+        .frame-link svg {
+            width: 14px;
+            height: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .frame-link:hover svg {
+            transform: translateX(3px);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 4rem;
+        }
+
+        .footer-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.1em;
+        }
+
+        /* No results */
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .frames-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+        }
+
+        /* Calculator Styles */
+        .sub-filter {
+            border-top: none;
+            padding-top: 0.75rem;
+            background: rgba(15, 15, 15, 0.5);
+        }
+
+        .view-btn.active {
+            background: rgba(201, 169, 98, 0.15);
+        }
+
+        .calculator-section {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .calculator-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .calc-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            padding: 2rem;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .calc-panel.total-panel {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(201, 169, 98, 0.08) 0%, var(--bg-card) 100%);
+        }
+
+        .calc-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .calc-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .calc-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calc-group {
+            flex: 1;
+        }
+
+        .calc-group.full-width {
+            flex: none;
+            width: 100%;
+        }
+
+        .calc-group.band-display {
+            flex: 0 0 120px;
+        }
+
+        .calc-label {
+            display: block;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .calc-input,
+        .calc-select {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .calc-input:focus,
+        .calc-select:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .calc-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a09a90' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+
+        .calc-select option {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .band-value {
+            padding: 0.9rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            font-size: 1.4rem;
+            font-weight: 600;
+            text-align: center;
+            color: var(--accent-gold);
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 0;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 0.9rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:first-child {
+            border-right: none;
+        }
+
+        .toggle-btn.active {
+            background: rgba(201, 169, 98, 0.15);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .toggle-btn:hover:not(.active) {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .calc-divider {
+            height: 1px;
+            background: var(--border-subtle);
+            margin: 1.5rem 0;
+        }
+
+        .calc-result {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .result-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+        }
+
+        .glass-info {
+            background: rgba(201, 169, 98, 0.05);
+            border: 1px solid var(--border-subtle);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .info-row span:last-child {
+            color: var(--text-primary);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .total-row span:last-child {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            color: var(--text-primary);
+        }
+
+        .total-row.grand-total {
+            padding-top: 1rem;
+        }
+
+        .total-row.grand-total span:first-child {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .total-row.grand-total span:last-child {
+            font-size: 2.4rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+        }
+
+        .reset-btn {
+            width: 100%;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        @media (max-width: 900px) {
+            .calculator-container {
+                grid-template-columns: 1fr;
+            }
+
+            .calc-panel.total-panel {
+                grid-column: auto;
+            }
+
+            .calc-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .calc-group.band-display {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="logo-text">Frames <span>&</span> Slips</h1>
+        <p class="tagline">Gallery Reference Guide</p>
+    </header>
+
+    <nav class="filter-bar">
+        <button class="filter-btn view-btn active" data-view="frames">Frame Catalogue</button>
+        <button class="filter-btn view-btn" data-view="calculator">Price Calculator</button>
+    </nav>
+
+    <nav class="filter-bar sub-filter" id="frameFilters">
+        <button class="filter-btn active" data-filter="all">All Frames</button>
+        <button class="filter-btn" data-filter="larson">Larson Juhl</button>
+        <button class="filter-btn" data-filter="lion">Lion</button>
+    </nav>
+
+    <div class="search-container" id="searchContainer">
+        <input type="text" class="search-input" placeholder="Search by code, description, or usage..." id="searchInput">
+    </div>
+
+    <!-- Calculator Section -->
+    <section class="calculator-section" id="calculatorSection" style="display: none;">
+        <div class="calculator-container">
+            <div class="calc-panel">
+                <h2 class="calc-title">Frame Price Calculator</h2>
+
+                <div class="calc-row">
+                    <div class="calc-group">
+                        <label class="calc-label">Frame Code</label>
+                        <select id="frameSelect" class="calc-select">
+                            <option value="">Select a frame...</option>
+                        </select>
+                    </div>
+                    <div class="calc-group band-display">
+                        <label class="calc-label">Price Band</label>
+                        <div class="band-value" id="bandDisplay">-</div>
+                    </div>
+                </div>
+
+                <div class="calc-row">
+                    <div class="calc-group">
+                        <label class="calc-label">Length (cm)</label>
+                        <input type="number" id="lengthInput" class="calc-input" placeholder="e.g. 65" min="1" step="0.1">
+                    </div>
+                    <div class="calc-group">
+                        <label class="calc-label">Width (cm)</label>
+                        <input type="number" id="widthInput" class="calc-input" placeholder="e.g. 70" min="1" step="0.1">
+                    </div>
+                </div>
+
+                <div class="calc-row">
+                    <div class="calc-group">
+                        <label class="calc-label">Include Glass/Perspex?</label>
+                        <div class="toggle-group">
+                            <button class="toggle-btn active" data-glass="no">No Glass</button>
+                            <button class="toggle-btn" data-glass="yes">With Glass (+£50)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-divider"></div>
+
+                <div class="calc-result">
+                    <div class="result-label">Frame Price</div>
+                    <div class="result-value" id="framePrice">£0.00</div>
+                </div>
+            </div>
+
+            <div class="calc-panel">
+                <h2 class="calc-title">Glazing Upgrade Calculator</h2>
+                <p class="calc-subtitle">Calculate additional cost for premium glazing options</p>
+
+                <div class="calc-row">
+                    <div class="calc-group">
+                        <label class="calc-label">Height (cm)</label>
+                        <input type="number" id="glassHeight" class="calc-input" placeholder="e.g. 86.5" min="1" step="0.1">
+                    </div>
+                    <div class="calc-group">
+                        <label class="calc-label">Width (cm)</label>
+                        <input type="number" id="glassWidth" class="calc-input" placeholder="e.g. 64.5" min="1" step="0.1">
+                    </div>
+                </div>
+
+                <div class="calc-row">
+                    <div class="calc-group full-width">
+                        <label class="calc-label">Glass Type</label>
+                        <select id="glassType" class="calc-select">
+                            <option value="0">Standard Glass (included)</option>
+                            <option value="0.02">UV AR/70 - £0.02/cm² (98% UV protection)</option>
+                            <option value="0.028">UV AR/99 Museum Glass - £0.028/cm² (best quality)</option>
+                            <option value="0.05">Museum Acrylic - £0.05/cm² (for overseas shipping)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="glass-info">
+                    <div class="info-row"><span>Area:</span> <span id="glassArea">0 cm²</span></div>
+                </div>
+
+                <div class="calc-divider"></div>
+
+                <div class="calc-result">
+                    <div class="result-label">Glazing Upgrade Cost</div>
+                    <div class="result-value" id="glassPrice">£0.00</div>
+                </div>
+            </div>
+
+            <div class="calc-panel total-panel">
+                <div class="total-row">
+                    <span>Frame Price:</span>
+                    <span id="totalFrame">£0.00</span>
+                </div>
+                <div class="total-row">
+                    <span>Glazing Upgrade:</span>
+                    <span id="totalGlass">£0.00</span>
+                </div>
+                <div class="calc-divider"></div>
+                <div class="total-row grand-total">
+                    <span>Total Quote:</span>
+                    <span id="grandTotal">£0.00</span>
+                </div>
+                <button class="reset-btn" id="resetCalc">Reset Calculator</button>
+            </div>
+        </div>
+    </section>
+
+    <main id="framesSection">
+        <div class="frames-grid" id="framesGrid">
+            <!-- Frame cards will be inserted here by JavaScript -->
+        </div>
+    </main>
+
+    <footer>
+        <p class="footer-text">Standard Frames, Slips & Alternative Options</p>
+    </footer>
+
+    <script>
+        // Price band mapping from spreadsheet
+        const priceBands = {
+            // Band A
+            "617348000": "A", "431434": "A", "350790": "A", "350792": "A",
+            "266412626": "A", "266412727": "A", "265411727": "A", "337167000": "A",
+            "432167246": "A", "432167348": "A", "441227000": "A", "440227000": "A",
+            "532167000": "A", "734146000": "A", "734148000": "A", "216167000": "A",
+            "219000178": "A", "241000107": "A", "241000167": "A", "277501653": "A",
+            "277501673": "A", "277501753": "A", "277501773": "A", "342703001": "A",
+            "411167003": "A", "411167007": "A", "415220167": "A", "431167000": "A",
+            "432167000": "A",
+            // Band B
+            "756287000": "B", "739287000": "B", "791287000": "B", "549650": "B",
+            "536560": "B", "283502653": "B", "283502673": "B", "283502753": "B",
+            "283502773": "B", "513287000": "B", "737075000": "B", "737077000": "B",
+            "737079000": "B", "L2789": "B",
+            // Band C
+            "407000127": "C", "407000167": "C", "513167000": "C", "508167000": "C",
+            "601167000": "C", "639167000": "C", "517167000": "C"
+        };
+
+        const framesData = [
+            {
+                code: "617348000",
+                title: "Champagne Mottled",
+                description: "Mottled finish with brown/copper flecks running through the paint work, giving a champagne hue. Each stick will be slightly different as they are hand finished.",
+                usedOn: ["BDY", "SRA"],
+                alternative: "Contact coordinator for selection",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-617348000",
+                supplier: "larson"
+            },
+            {
+                code: "431434",
+                title: "Black Satin Zen",
+                description: "Black, satin finish.",
+                usedOn: ["BDY", "MONDO", "WHN"],
+                alternative: "L3135 / 431167000 (dark slate grey, identical profile)",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-signature/ljs-zen-moulding-pefc-431434",
+                supplier: "larson"
+            },
+            {
+                code: "350790",
+                title: "Lucerne Woodgrain",
+                description: "Brown/black woodgrain border with painted silver inner step.",
+                usedOn: ["BCN", "RWO"],
+                alternative: "650790 / 350792",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-signature/ljs-lucerne-moulding-pefc-350790",
+                supplier: "larson"
+            },
+            {
+                code: "756287000",
+                title: "Textured Brown/Black",
+                description: "Mottled brown/black textured finish.",
+                usedOn: ["BBA", "JJO", "NMA"],
+                alternative: "L3239 / 739287000 / 791287000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-756287000",
+                supplier: "larson"
+            },
+            {
+                code: "532167000",
+                title: "Mono Float Black",
+                description: "Black, satin finish with floated-look step border.",
+                usedOn: ["JJO", "PAPER"],
+                alternative: "337167000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-mono-moulding-532167000",
+                supplier: "larson"
+            },
+            {
+                code: "549650",
+                title: "Tate",
+                description: "Classic profile from the Signature collection.",
+                usedOn: ["PKE", "RBR"],
+                alternative: "536560",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-signature/ljs-tate-moulding-549650",
+                supplier: "larson"
+            },
+            {
+                code: "266412727",
+                title: "Provence Ornate",
+                description: "Elegant ornate profile from the Collections range.",
+                usedOn: ["LCO"],
+                alternative: "265411727",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-provence-moulding-fsc-266412727",
+                supplier: "larson"
+            },
+            {
+                code: "266412626",
+                title: "Provence Classic",
+                description: "Classic ornate profile from the Collections range.",
+                usedOn: ["LCO"],
+                alternative: "283502653",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-provence-moulding-fsc-266412626",
+                supplier: "larson"
+            },
+            {
+                code: "432167246",
+                title: "Urbane Natural",
+                description: "Contemporary urbane profile.",
+                usedOn: ["NHU"],
+                alternative: "L2948",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-urbane-moulding-432167246",
+                supplier: "larson"
+            },
+            {
+                code: "432167348",
+                title: "Urbane Dark",
+                description: "Contemporary urbane profile in darker finish.",
+                usedOn: ["NHU"],
+                alternative: "L2947",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-urbane-moulding-432167348",
+                supplier: "larson"
+            },
+            {
+                code: "283502753",
+                title: "Andover Gold",
+                description: "Classic Andover profile in gold finish.",
+                usedOn: ["PCO"],
+                alternative: "277501753",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-andover-moulding-fsc-283502753",
+                supplier: "larson"
+            },
+            {
+                code: "283502773",
+                title: "Andover Silver",
+                description: "Classic Andover profile in silver finish.",
+                usedOn: ["PCO"],
+                alternative: "277501773",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-andover-moulding-fsc-283502773",
+                supplier: "larson"
+            },
+            {
+                code: "283502673",
+                title: "Andover Bronze",
+                description: "Classic Andover profile in bronze finish.",
+                usedOn: ["PCO"],
+                alternative: "277501673",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-andover-moulding-fsc-283502673",
+                supplier: "larson"
+            },
+            {
+                code: "283502653",
+                title: "Andover Copper",
+                description: "Classic Andover profile in copper finish.",
+                usedOn: ["PCO"],
+                alternative: "277501653",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-andover-moulding-fsc-283502653",
+                supplier: "larson"
+            },
+            {
+                code: "601167000",
+                title: "Essentials Black",
+                description: "Essential black profile, versatile for multiple uses.",
+                usedOn: ["PSM", "DLN", "SMM"],
+                alternative: "216167000 / 432167000 / 241000167",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-601167000",
+                supplier: "larson"
+            },
+            {
+                code: "734146000",
+                title: "Essentials Natural",
+                description: "Natural wood finish from Essentials range.",
+                usedOn: ["PSM"],
+                alternative: "734148000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-734146000",
+                supplier: "larson"
+            },
+            {
+                code: "737077000",
+                title: "Essentials Oak",
+                description: "Oak finish from Essentials range.",
+                usedOn: ["PSM", "XWA"],
+                alternative: "737079000 / 737075000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/lje-moulding-737077000",
+                supplier: "larson"
+            },
+            {
+                code: "337167000",
+                title: "Essentials Slate",
+                description: "Slate black finish from Essentials range.",
+                usedOn: ["RRO"],
+                alternative: "517167000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-337167000",
+                supplier: "larson"
+            },
+            {
+                code: "441227000",
+                title: "Essentials White",
+                description: "Clean white finish from Essentials range.",
+                usedOn: [],
+                alternative: "440227000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-441227000",
+                supplier: "larson"
+            },
+            {
+                code: "513167000",
+                title: "Collections Black",
+                description: "Black profile from Collections range.",
+                usedOn: [],
+                alternative: "508167000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-moulding-513167000",
+                supplier: "larson"
+            },
+            {
+                code: "415220167",
+                title: "Box Canvas",
+                description: "Black high gloss float moulding for canvas work.",
+                usedOn: ["STL", "RBR"],
+                alternative: "",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-float-moulding-415220167",
+                supplier: "larson"
+            },
+            {
+                code: "216167000",
+                title: "Essentials Profile",
+                description: "Versatile essential profile for multiple uses.",
+                usedOn: ["PSM", "DLN", "SMM"],
+                alternative: "432167000 / 241000167",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-216167000",
+                supplier: "larson"
+            },
+            {
+                code: "241000107",
+                title: "Coastal Woods Natural",
+                description: "Natural finish from Coastal Woods collection.",
+                usedOn: [],
+                alternative: "",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-coastal-woods-moulding-241000107",
+                supplier: "larson"
+            },
+            {
+                code: "241000167",
+                title: "Coastal Woods Dark",
+                description: "Dark finish from Coastal Woods collection.",
+                usedOn: ["PSM", "DLN", "SMM"],
+                alternative: "216167000 / 432167000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-241000167",
+                supplier: "larson"
+            },
+            {
+                code: "265411727",
+                title: "Provence Alternative",
+                description: "Elegant ornate profile with gold accents.",
+                usedOn: ["LCO"],
+                alternative: "266412727",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-265411727",
+                supplier: "larson"
+            },
+            {
+                code: "277501653",
+                title: "Andover Copper Alt",
+                description: "Alternative Andover profile with silver accents.",
+                usedOn: ["PCO"],
+                alternative: "283502653",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-277501653",
+                supplier: "larson"
+            },
+            {
+                code: "277501753",
+                title: "Andover Gold Alt",
+                description: "Alternative Andover profile with gold accents.",
+                usedOn: ["PCO"],
+                alternative: "283502753",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-277501753",
+                supplier: "larson"
+            },
+            {
+                code: "277501773",
+                title: "Andover Silver Alt",
+                description: "Alternative Andover profile in silver finish.",
+                usedOn: ["PCO"],
+                alternative: "283502773",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-277501773",
+                supplier: "larson"
+            },
+            {
+                code: "342703001",
+                title: "Heritage Profile",
+                description: "Classic heritage frame profile.",
+                usedOn: ["NHU"],
+                alternative: "",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-342703001",
+                supplier: "larson"
+            },
+            {
+                code: "350792",
+                title: "Lucerne Silver",
+                description: "Lucerne profile with silver accents.",
+                usedOn: ["BCN", "RWO"],
+                alternative: "650790 / 350790",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-350792",
+                supplier: "larson"
+            },
+            {
+                code: "407000127",
+                title: "Coastal Woods Float White",
+                description: "White finish float moulding from Coastal Woods.",
+                usedOn: ["SRA"],
+                alternative: "L3072",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-coastal-woods-float-moulding-407000127",
+                supplier: "larson"
+            },
+            {
+                code: "407000167",
+                title: "Essentials Black Satin",
+                description: "Black satin finish essential profile.",
+                usedOn: ["PKE"],
+                alternative: "",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-407000167",
+                supplier: "larson"
+            },
+            {
+                code: "411167003",
+                title: "Caserta Light",
+                description: "Light finish from Caserta collection.",
+                usedOn: ["PKE"],
+                alternative: "",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-caserta-moulding-pefc-411167003",
+                supplier: "larson"
+            },
+            {
+                code: "411167007",
+                title: "Caserta Dark",
+                description: "Dark finish from Caserta collection.",
+                usedOn: ["PKE"],
+                alternative: "",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-caserta-moulding-pefc-411167007",
+                supplier: "larson"
+            },
+            {
+                code: "431167000",
+                title: "Zen Slate Grey",
+                description: "Dark slate grey with identical profile to 431434.",
+                usedOn: ["BDY", "MONDO", "WHN"],
+                alternative: "431434 / L3135",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-signature/ljs-zen-moulding-431167000",
+                supplier: "larson"
+            },
+            {
+                code: "432167000",
+                title: "Urbane Black",
+                description: "Contemporary urbane profile in black.",
+                usedOn: ["PSM", "DLN", "SMM"],
+                alternative: "216167000 / 241000167",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-432167000",
+                supplier: "larson"
+            },
+            {
+                code: "440227000",
+                title: "Essentials White Alt",
+                description: "Alternative white finish from Essentials range.",
+                usedOn: [],
+                alternative: "441227000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-440227000",
+                supplier: "larson"
+            },
+            {
+                code: "508167000",
+                title: "Essentials Black Profile",
+                description: "Black satin finish profile.",
+                usedOn: ["MAZ", "RHM"],
+                alternative: "639167000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-508167000",
+                supplier: "larson"
+            },
+            {
+                code: "513287000",
+                title: "Float Moulding Textured",
+                description: "Mottled textured finish float moulding for canvas.",
+                usedOn: ["BBA", "BOX", "CANVAS"],
+                alternative: "513167000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-float-moulding-513287000",
+                supplier: "larson"
+            },
+            {
+                code: "517167000",
+                title: "Essentials Slate Alt",
+                description: "Alternative slate finish from Essentials range.",
+                usedOn: ["RRO"],
+                alternative: "337167000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-517167000",
+                supplier: "larson"
+            },
+            {
+                code: "639167000",
+                title: "Essentials Black Wide",
+                description: "Black satin finish wide profile.",
+                usedOn: ["MAZ", "RHM"],
+                alternative: "508167000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-639167000",
+                supplier: "larson"
+            },
+            {
+                code: "650790",
+                title: "Lucerne Gold",
+                description: "Lucerne profile with silver/gold accents.",
+                usedOn: ["BCN", "RWO"],
+                alternative: "350790 / 350792",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-650790",
+                supplier: "larson"
+            },
+            {
+                code: "734148000",
+                title: "Essentials Natural Alt",
+                description: "Alternative natural wood finish.",
+                usedOn: ["PSM"],
+                alternative: "734146000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-734148000",
+                supplier: "larson"
+            },
+            {
+                code: "737075000",
+                title: "Essentials Oak Light",
+                description: "Light oak finish from Essentials range.",
+                usedOn: ["PSM", "XWA"],
+                alternative: "737077000 / 737079000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-737075000",
+                supplier: "larson"
+            },
+            {
+                code: "737079000",
+                title: "Essentials Oak Dark",
+                description: "Dark oak finish from Essentials range.",
+                usedOn: ["PSM", "XWA"],
+                alternative: "737077000 / 737075000",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-737079000",
+                supplier: "larson"
+            },
+            {
+                code: "739287000",
+                title: "Textured Brown Alt",
+                description: "Mottled brown/black textured finish alternative.",
+                usedOn: ["BBA", "JJO", "NMA"],
+                alternative: "756287000 / 791287000 / L3239",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-739287000",
+                supplier: "larson"
+            },
+            {
+                code: "791287000",
+                title: "Textured Black Alt",
+                description: "Mottled brown/black textured finish alternative.",
+                usedOn: ["BBA", "JJO", "NMA"],
+                alternative: "756287000 / 739287000 / L3239",
+                link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-791287000",
+                supplier: "larson"
+            },
+            {
+                code: "219000178",
+                title: "Slip",
+                description: "Custom slip especially made for Castle Fine Art.",
+                usedOn: ["PCO", "BBA", "JJO"],
+                alternative: "",
+                link: "",
+                supplier: "larson",
+                image: "219000178.jpg"
+            },
+            // Lion Frames
+            {
+                code: "L1403",
+                title: "Two Way Black Wash",
+                description: "7mm Two Way Ls Black Wash FSC 100% Frame Moulding.",
+                usedOn: [],
+                alternative: "",
+                link: "https://www.lionpic.co.uk/p/12649/7mm-Two-Way-Ls-Black-Wash-FSC-100-Frame-Moulding",
+                supplier: "lion",
+                image: "Two-Way-Frame-Moulding-Chevron-L1403-02.webp"
+            },
+            {
+                code: "L2716",
+                title: "Brompton Olive",
+                description: "91mm Brompton Olive FSC Certified 100% Frame Moulding.",
+                usedOn: [],
+                alternative: "",
+                link: "https://www.lionpic.co.uk/p/39549/91mm-Brompton-Olive-FSC-Certified-100-Frame-Moulding",
+                supplier: "lion",
+                image: "Brompton-Frame-Moulding-chevron-L2716-02.webp"
+            },
+            {
+                code: "L2789",
+                title: "Bloc L Style Black",
+                description: "25mm Bloc L Style Black 48mm rebate Frame Moulding.",
+                usedOn: [],
+                alternative: "",
+                link: "https://www.lionpic.co.uk/p/39698/25mm-Bloc-L-Style-Black-48mm-rebate-Frame-Moulding",
+                supplier: "lion",
+                image: "BLOC-Frame-Moulding-Chevron-L2789-01.webp"
+            },
+            {
+                code: "L2947",
+                title: "Vermeer Matt Black Silver",
+                description: "65mm Vermeer Matt Black Silver Sight Edge FSC 100% Frame Moulding.",
+                usedOn: ["NHU"],
+                alternative: "432167348",
+                link: "https://www.lionpic.co.uk/p/40420/65mm-Vermeer-Matt-Black-Silver-Sight-Edge-FSC-100-Frame-Moulding",
+                supplier: "lion",
+                image: "Vermeer-Frame-Moulding-Chevron-L2947-02.webp"
+            },
+            {
+                code: "L2948",
+                title: "Vermeer Matt Black Gold",
+                description: "65mm Vermeer Matt Black Gold Sight Edge FSC 100% Frame Moulding.",
+                usedOn: ["NHU"],
+                alternative: "432167246",
+                link: "https://www.lionpic.co.uk/p/40423/65mm-Vermeer-Matt-Black-Gold-Sight-Edge-FSC-100-Frame-Moulding",
+                supplier: "lion",
+                image: "Vermeer-Frame-Moulding-Chevron-L2948-02.webp"
+            },
+            {
+                code: "L3072",
+                title: "Bloc L Style White",
+                description: "80mm Bloc L Style White Open Grain Frame Moulding.",
+                usedOn: [],
+                alternative: "",
+                link: "https://www.lionpic.co.uk/p/41460/80mm-Bloc-L-Style-White-Open-Grain-Frame-Moulding",
+                supplier: "lion",
+                image: "BLOC-Frame-Moulding-Chevron-L3072-01.webp"
+            },
+            {
+                code: "L3135",
+                title: "Niro Black",
+                description: "35mm x 50mm Niro Black FSC 100% Frame Moulding.",
+                usedOn: [],
+                alternative: "431434",
+                link: "https://www.lionpic.co.uk/p/41778/35mm-x-50mm-Niro-Black-FSC-100-Frame-Moulding",
+                supplier: "lion",
+                image: "Niro-Frame-Moulding-Chevron-L3135-02.webp"
+            },
+            {
+                code: "L3239",
+                title: "Alpine Distressed Black",
+                description: "74mm Alpine Distressed Black Frame Moulding.",
+                usedOn: [],
+                alternative: "756287000",
+                link: "https://www.lionpic.co.uk/p/42158/74mm-Alpine-Distressed-Black-Frame-Moulding",
+                supplier: "lion",
+                image: "Alpine-Frame-Moulding-Chevron-L3239.webp"
+            }
+        ];
+
+        const arrowIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>`;
+
+        function createFrameCard(frame) {
+            const usedOnTags = frame.usedOn.map(tag => `<span class="meta-tag">${tag}</span>`).join('');
+            // Use custom image path for Lion, standard format for Larson
+            const imageUrl = frame.image ? frame.image : `${frame.code}_4.jpg`;
+            const supplierName = frame.supplier === 'lion' ? 'Lion' : 'Larson Juhl';
+            const supplierClass = frame.supplier === 'lion' ? 'lion-supplier' : 'larson-supplier';
+
+            return `
+                <article class="frame-card ${supplierClass}" data-supplier="${frame.supplier}" data-code="${frame.code}" data-used="${frame.usedOn.join(' ')}" data-desc="${frame.description}">
+                    <div class="frame-image-container">
+                        <span class="frame-code-badge">${frame.code}</span>
+                        <span class="supplier-badge">${supplierName}</span>
+                        <img src="${imageUrl}" alt="${frame.title}" class="frame-image" onerror="this.style.display='none'">
+                    </div>
+                    <div class="frame-content">
+                        <h2 class="frame-title">${frame.title}</h2>
+                        <p class="frame-description">${frame.description}</p>
+                        ${usedOnTags ? `<div class="frame-meta">${usedOnTags}</div>` : ''}
+                        ${frame.alternative ? `<p class="frame-alternatives"><strong>Alt:</strong> ${frame.alternative}</p>` : ''}
+                        ${frame.link ? `<a href="${frame.link}" target="_blank" rel="noopener noreferrer" class="frame-link">
+                            View on ${supplierName} ${arrowIcon}
+                        </a>` : ''}
+                    </div>
+                </article>
+            `;
+        }
+
+        function renderFrames(frames) {
+            const grid = document.getElementById('framesGrid');
+            if (frames.length === 0) {
+                grid.innerHTML = '<p class="no-results">No frames found matching your search.</p>';
+                return;
+            }
+            grid.innerHTML = frames.map(createFrameCard).join('');
+        }
+
+        // Initial render
+        renderFrames(framesData);
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = framesData.filter(frame =>
+                frame.code.toLowerCase().includes(query) ||
+                frame.title.toLowerCase().includes(query) ||
+                frame.description.toLowerCase().includes(query) ||
+                frame.usedOn.some(tag => tag.toLowerCase().includes(query)) ||
+                frame.alternative.toLowerCase().includes(query)
+            );
+            renderFrames(filtered);
+        });
+
+        // Filter buttons
+        document.querySelectorAll('#frameFilters .filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#frameFilters .filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const filter = btn.dataset.filter;
+                if (filter === 'all') {
+                    renderFrames(framesData);
+                } else {
+                    const filtered = framesData.filter(f => f.supplier === filter);
+                    renderFrames(filtered);
+                }
+            });
+        });
+
+        // View switching (Frames vs Calculator)
+        const framesSection = document.getElementById('framesSection');
+        const calculatorSection = document.getElementById('calculatorSection');
+        const searchContainer = document.getElementById('searchContainer');
+        const frameFilters = document.getElementById('frameFilters');
+
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const view = btn.dataset.view;
+                if (view === 'frames') {
+                    framesSection.style.display = 'block';
+                    searchContainer.style.display = 'block';
+                    frameFilters.style.display = 'flex';
+                    calculatorSection.style.display = 'none';
+                } else {
+                    framesSection.style.display = 'none';
+                    searchContainer.style.display = 'none';
+                    frameFilters.style.display = 'none';
+                    calculatorSection.style.display = 'block';
+                }
+            });
+        });
+
+        // Calculator functionality
+        const frameSelect = document.getElementById('frameSelect');
+        const bandDisplay = document.getElementById('bandDisplay');
+        const lengthInput = document.getElementById('lengthInput');
+        const widthInput = document.getElementById('widthInput');
+        const framePrice = document.getElementById('framePrice');
+        const glassHeight = document.getElementById('glassHeight');
+        const glassWidth = document.getElementById('glassWidth');
+        const glassType = document.getElementById('glassType');
+        const glassArea = document.getElementById('glassArea');
+        const glassPrice = document.getElementById('glassPrice');
+        const totalFrame = document.getElementById('totalFrame');
+        const totalGlass = document.getElementById('totalGlass');
+        const grandTotal = document.getElementById('grandTotal');
+
+        let includeGlass = false;
+
+        // Populate frame select dropdown
+        framesData.forEach(frame => {
+            const band = priceBands[frame.code] || '?';
+            const option = document.createElement('option');
+            option.value = frame.code;
+            option.textContent = `${frame.code} - ${frame.title} (Band ${band})`;
+            frameSelect.appendChild(option);
+        });
+
+        // Glass toggle buttons
+        document.querySelectorAll('.toggle-btn[data-glass]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.toggle-btn[data-glass]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                includeGlass = btn.dataset.glass === 'yes';
+                calculateFramePrice();
+            });
+        });
+
+        // Frame selection change
+        frameSelect.addEventListener('change', () => {
+            const code = frameSelect.value;
+            const band = priceBands[code] || '-';
+            bandDisplay.textContent = band;
+            calculateFramePrice();
+        });
+
+        // Dimension inputs
+        lengthInput.addEventListener('input', calculateFramePrice);
+        widthInput.addEventListener('input', calculateFramePrice);
+
+        // Glass inputs
+        glassHeight.addEventListener('input', calculateGlassPrice);
+        glassWidth.addEventListener('input', calculateGlassPrice);
+        glassType.addEventListener('change', calculateGlassPrice);
+
+        function calculateFramePrice() {
+            const code = frameSelect.value;
+            const band = priceBands[code];
+            const length = parseFloat(lengthInput.value) || 0;
+            const width = parseFloat(widthInput.value) || 0;
+
+            if (!band || length <= 0 || width <= 0) {
+                framePrice.textContent = '£0.00';
+                totalFrame.textContent = '£0.00';
+                updateGrandTotal();
+                return;
+            }
+
+            // Calculate perimeter in meters
+            const perimeterMeters = ((length * 2) + (width * 2)) / 100;
+
+            // Band multipliers (from spreadsheet: A=6*5=30, B=9*5=45, C=12*5=60)
+            const multipliers = { A: 30, B: 45, C: 60 };
+            const multiplier = multipliers[band] || 30;
+
+            let price = perimeterMeters * multiplier;
+
+            // Add glass surcharge if selected
+            if (includeGlass) {
+                price += 50;
+            }
+
+            const priceFormatted = '£' + price.toFixed(2);
+            framePrice.textContent = priceFormatted;
+            totalFrame.textContent = priceFormatted;
+            updateGrandTotal();
+        }
+
+        function calculateGlassPrice() {
+            const height = parseFloat(glassHeight.value) || 0;
+            const width = parseFloat(glassWidth.value) || 0;
+            const ratePerCm2 = parseFloat(glassType.value) || 0;
+
+            const area = height * width;
+            glassArea.textContent = area.toFixed(0) + ' cm²';
+
+            const price = area * ratePerCm2;
+            const priceFormatted = '£' + price.toFixed(2);
+            glassPrice.textContent = priceFormatted;
+            totalGlass.textContent = priceFormatted;
+            updateGrandTotal();
+        }
+
+        function updateGrandTotal() {
+            const framePriceVal = parseFloat(framePrice.textContent.replace('£', '')) || 0;
+            const glassPriceVal = parseFloat(glassPrice.textContent.replace('£', '')) || 0;
+            const total = framePriceVal + glassPriceVal;
+            grandTotal.textContent = '£' + total.toFixed(2);
+        }
+
+        // Reset button
+        document.getElementById('resetCalc').addEventListener('click', () => {
+            frameSelect.value = '';
+            bandDisplay.textContent = '-';
+            lengthInput.value = '';
+            widthInput.value = '';
+            glassHeight.value = '';
+            glassWidth.value = '';
+            glassType.value = '0';
+            includeGlass = false;
+            document.querySelectorAll('.toggle-btn[data-glass]').forEach(b => b.classList.remove('active'));
+            document.querySelector('.toggle-btn[data-glass="no"]').classList.add('active');
+            framePrice.textContent = '£0.00';
+            glassArea.textContent = '0 cm²';
+            glassPrice.textContent = '£0.00';
+            totalFrame.textContent = '£0.00';
+            totalGlass.textContent = '£0.00';
+            grandTotal.textContent = '£0.00';
+        });
+    </script>
+</body>
+</html>
