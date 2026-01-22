@@ -686,6 +686,172 @@
             color: var(--accent-gold);
         }
 
+        /* Admin Styles */
+        .admin-btn {
+            margin-left: auto;
+            opacity: 0.6;
+        }
+
+        .admin-btn:hover {
+            opacity: 1;
+        }
+
+        .admin-section {
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .admin-login {
+            display: flex;
+            justify-content: center;
+            padding-top: 3rem;
+        }
+
+        .login-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-error {
+            color: #e57373;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .stock-list {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stock-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            transition: all 0.2s ease;
+        }
+
+        .stock-item:hover {
+            border-color: var(--border-hover);
+        }
+
+        .stock-item.out-of-stock {
+            border-color: #e57373;
+            background: rgba(229, 115, 115, 0.05);
+        }
+
+        .stock-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stock-item-code {
+            font-weight: 600;
+            color: var(--accent-gold);
+            font-size: 0.9rem;
+        }
+
+        .stock-item-title {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .stock-toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .stock-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .stock-toggle.in-stock {
+            background: rgba(129, 199, 132, 0.2);
+            border-color: #81c784;
+        }
+
+        .stock-toggle.in-stock::after {
+            left: 27px;
+            background: #81c784;
+        }
+
+        .stock-toggle.out-of-stock {
+            background: rgba(229, 115, 115, 0.2);
+            border-color: #e57373;
+        }
+
+        .stock-toggle.out-of-stock::after {
+            background: #e57373;
+        }
+
+        /* Out of stock badge on frame cards */
+        .out-of-stock-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+            background: rgba(229, 115, 115, 0.95);
+            padding: 0.3rem 0.6rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #fff;
+        }
+
+        .frame-card.is-out-of-stock {
+            opacity: 0.6;
+        }
+
+        .frame-card.is-out-of-stock:hover {
+            opacity: 0.8;
+        }
+
+        .backup-badge {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 10;
+            background: rgba(129, 199, 132, 0.95);
+            padding: 0.3rem 0.6rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #1a1a1a;
+        }
+
         @media (max-width: 900px) {
             .calculator-container {
                 grid-template-columns: 1fr;
@@ -718,6 +884,7 @@
     <nav class="filter-bar">
         <button class="filter-btn view-btn active" data-view="frames">Frame Catalogue</button>
         <button class="filter-btn view-btn" data-view="calculator">Price Calculator</button>
+        <button class="filter-btn view-btn admin-btn" data-view="admin">Admin</button>
     </nav>
 
     <nav class="filter-bar sub-filter" id="frameFilters">
@@ -839,6 +1006,37 @@
         </div>
     </section>
 
+    <!-- Admin Section -->
+    <section class="admin-section" id="adminSection" style="display: none;">
+        <div class="admin-container">
+            <!-- Password Gate -->
+            <div class="admin-login" id="adminLogin">
+                <div class="login-panel">
+                    <h2 class="calc-title">Admin Access</h2>
+                    <p class="calc-subtitle">Enter password to manage stock levels</p>
+                    <div class="calc-group">
+                        <input type="password" id="adminPassword" class="calc-input" placeholder="Enter password">
+                    </div>
+                    <button class="export-btn" id="adminLoginBtn" style="margin-top: 1rem;">Login</button>
+                    <p class="login-error" id="loginError" style="display: none;">Incorrect password</p>
+                </div>
+            </div>
+
+            <!-- Admin Panel (shown after login) -->
+            <div class="admin-panel" id="adminPanel" style="display: none;">
+                <div class="admin-header">
+                    <h2 class="calc-title">Stock Management</h2>
+                    <button class="reset-btn" id="adminLogout" style="width: auto; padding: 0.5rem 1rem;">Logout</button>
+                </div>
+                <p class="calc-subtitle">Mark frames as out of stock. When a frame is out of stock, its backup alternatives will appear in the catalogue.</p>
+
+                <div class="stock-list" id="stockList">
+                    <!-- Stock items will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
     <main id="framesSection">
         <div class="frames-grid" id="framesGrid">
             <!-- Frame cards will be inserted here by JavaScript -->
@@ -860,15 +1058,15 @@
             "219000178": "A", "241000107": "A", "241000167": "A", "277501653": "A",
             "277501673": "A", "277501753": "A", "277501773": "A", "342703001": "A",
             "411167003": "A", "411167007": "A", "415220167": "A", "431167000": "A",
-            "432167000": "A",
+            "432167000": "A", "L3135": "A",
             // Band B
             "756287000": "B", "739287000": "B", "791287000": "B", "549650": "B",
             "536560": "B", "283502653": "B", "283502673": "B", "283502753": "B",
             "283502773": "B", "513287000": "B", "737075000": "B", "737077000": "B",
-            "737079000": "B", "L2789": "B",
+            "737079000": "B", "L2789": "B", "L2716": "B", "L2947": "B", "L2948": "B",
             // Band C
             "407000127": "C", "407000167": "C", "513167000": "C", "508167000": "C",
-            "601167000": "C", "639167000": "C", "517167000": "C"
+            "601167000": "C", "639167000": "C", "517167000": "C", "L3072": "C"
         };
 
         const framesData = [
@@ -904,7 +1102,7 @@
                 title: "Textured Brown/Black",
                 description: "Mottled brown/black textured finish.",
                 usedOn: ["BBA", "JJO", "NMA"],
-                alternative: "L3239 / 739287000 / 791287000",
+                alternative: "739287000 / 791287000",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-756287000",
                 supplier: "larson"
             },
@@ -1077,7 +1275,8 @@
                 usedOn: [],
                 alternative: "",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-coastal-woods-moulding-241000107",
-                supplier: "larson"
+                supplier: "larson",
+                backupOnly: true
             },
             {
                 code: "241000167",
@@ -1095,7 +1294,8 @@
                 usedOn: ["LCO"],
                 alternative: "266412727",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-265411727",
-                supplier: "larson"
+                supplier: "larson",
+                backupOnly: true
             },
             {
                 code: "277501653",
@@ -1104,7 +1304,8 @@
                 usedOn: ["PCO"],
                 alternative: "283502653",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-277501653",
-                supplier: "larson"
+                supplier: "larson",
+                backupOnly: true
             },
             {
                 code: "277501753",
@@ -1113,7 +1314,8 @@
                 usedOn: ["PCO"],
                 alternative: "283502753",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-277501753",
-                supplier: "larson"
+                supplier: "larson",
+                backupOnly: true
             },
             {
                 code: "277501773",
@@ -1122,7 +1324,8 @@
                 usedOn: ["PCO"],
                 alternative: "283502773",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-277501773",
-                supplier: "larson"
+                supplier: "larson",
+                backupOnly: true
             },
             {
                 code: "342703001",
@@ -1140,7 +1343,8 @@
                 usedOn: ["BCN", "RWO"],
                 alternative: "650790 / 350790",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-350792",
-                supplier: "larson"
+                supplier: "larson",
+                backupOnly: true
             },
             {
                 code: "407000127",
@@ -1194,7 +1398,8 @@
                 usedOn: ["PSM", "DLN", "SMM"],
                 alternative: "216167000 / 241000167",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-432167000",
-                supplier: "larson"
+                supplier: "larson",
+                backupOnly: true
             },
             {
                 code: "440227000",
@@ -1248,7 +1453,8 @@
                 usedOn: ["BCN", "RWO"],
                 alternative: "350790 / 350792",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-650790",
-                supplier: "larson"
+                supplier: "larson",
+                backupOnly: true
             },
             {
                 code: "734148000",
@@ -1257,7 +1463,8 @@
                 usedOn: ["PSM"],
                 alternative: "734146000",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-734148000",
-                supplier: "larson"
+                supplier: "larson",
+                backupOnly: true
             },
             {
                 code: "737075000",
@@ -1282,7 +1489,7 @@
                 title: "Textured Brown Alt",
                 description: "Mottled brown/black textured finish alternative.",
                 usedOn: ["BBA", "JJO", "NMA"],
-                alternative: "756287000 / 791287000 / L3239",
+                alternative: "756287000 / 791287000",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-739287000",
                 supplier: "larson"
             },
@@ -1291,7 +1498,7 @@
                 title: "Textured Black Alt",
                 description: "Mottled brown/black textured finish alternative.",
                 usedOn: ["BBA", "JJO", "NMA"],
-                alternative: "756287000 / 739287000 / L3239",
+                alternative: "756287000 / 739287000",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-791287000",
                 supplier: "larson"
             },
@@ -1344,7 +1551,8 @@
                 alternative: "432167348",
                 link: "https://www.lionpic.co.uk/p/40420/65mm-Vermeer-Matt-Black-Silver-Sight-Edge-FSC-100-Frame-Moulding",
                 supplier: "lion",
-                image: "Vermeer-Frame-Moulding-Chevron-L2947-02.webp"
+                image: "Vermeer-Frame-Moulding-Chevron-L2947-02.webp",
+                backupOnly: true
             },
             {
                 code: "L2948",
@@ -1354,7 +1562,8 @@
                 alternative: "432167246",
                 link: "https://www.lionpic.co.uk/p/40423/65mm-Vermeer-Matt-Black-Gold-Sight-Edge-FSC-100-Frame-Moulding",
                 supplier: "lion",
-                image: "Vermeer-Frame-Moulding-Chevron-L2948-02.webp"
+                image: "Vermeer-Frame-Moulding-Chevron-L2948-02.webp",
+                backupOnly: true
             },
             {
                 code: "L3072",
@@ -1374,18 +1583,9 @@
                 alternative: "431434",
                 link: "https://www.lionpic.co.uk/p/41778/35mm-x-50mm-Niro-Black-FSC-100-Frame-Moulding",
                 supplier: "lion",
-                image: "Niro-Frame-Moulding-Chevron-L3135-02.webp"
+                image: "Niro-Frame-Moulding-Chevron-L3135-02.webp",
+                backupOnly: true
             },
-            {
-                code: "L3239",
-                title: "Alpine Distressed Black",
-                description: "74mm Alpine Distressed Black Frame Moulding.",
-                usedOn: [],
-                alternative: "756287000",
-                link: "https://www.lionpic.co.uk/p/42158/74mm-Alpine-Distressed-Black-Frame-Moulding",
-                supplier: "lion",
-                image: "Alpine-Frame-Moulding-Chevron-L3239.webp"
-            }
         ];
 
         const arrowIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>`;
@@ -1396,12 +1596,15 @@
             const imageUrl = frame.image ? frame.image : `${frame.code}_4.jpg`;
             const supplierName = frame.supplier === 'lion' ? 'Lion' : 'Larson Juhl';
             const supplierClass = frame.supplier === 'lion' ? 'lion-supplier' : 'larson-supplier';
+            const outOfStock = isOutOfStock(frame.code);
+            const isBackup = frame.backupOnly;
 
             return `
-                <article class="frame-card ${supplierClass}" data-supplier="${frame.supplier}" data-code="${frame.code}" data-used="${frame.usedOn.join(' ')}" data-desc="${frame.description}">
+                <article class="frame-card ${supplierClass} ${outOfStock ? 'is-out-of-stock' : ''}" data-supplier="${frame.supplier}" data-code="${frame.code}" data-used="${frame.usedOn.join(' ')}" data-desc="${frame.description}">
                     <div class="frame-image-container">
                         <span class="frame-code-badge">${frame.code}</span>
-                        <span class="supplier-badge">${supplierName}</span>
+                        ${outOfStock ? '<span class="out-of-stock-badge">Out of Stock</span>' : `<span class="supplier-badge">${supplierName}</span>`}
+                        ${isBackup ? '<span class="backup-badge">Alternative</span>' : ''}
                         <img src="${imageUrl}" alt="${frame.title}" class="frame-image" onerror="this.style.display='none'">
                     </div>
                     <div class="frame-content">
@@ -1419,11 +1622,15 @@
 
         function renderFrames(frames) {
             const grid = document.getElementById('framesGrid');
-            if (frames.length === 0) {
+
+            // Filter frames: hide backupOnly unless primary is out of stock
+            const visibleFrames = frames.filter(frame => shouldShowBackupFrame(frame));
+
+            if (visibleFrames.length === 0) {
                 grid.innerHTML = '<p class="no-results">No frames found matching your search.</p>';
                 return;
             }
-            grid.innerHTML = frames.map(createFrameCard).join('');
+            grid.innerHTML = visibleFrames.map(createFrameCard).join('');
         }
 
         // Initial render
@@ -1431,37 +1638,88 @@
 
         // Search functionality
         const searchInput = document.getElementById('searchInput');
+        let searchQuery = '';
+
         searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const filtered = framesData.filter(frame =>
-                frame.code.toLowerCase().includes(query) ||
-                frame.title.toLowerCase().includes(query) ||
-                frame.description.toLowerCase().includes(query) ||
-                frame.usedOn.some(tag => tag.toLowerCase().includes(query)) ||
-                frame.alternative.toLowerCase().includes(query)
-            );
-            renderFrames(filtered);
+            searchQuery = e.target.value.toLowerCase();
+            applyFiltersWithSearch();
         });
 
+        function applyFiltersWithSearch() {
+            let filtered = framesData;
+
+            // Apply supplier filter
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(f => f.supplier === currentFilter);
+            }
+
+            // Apply search filter
+            if (searchQuery) {
+                filtered = filtered.filter(frame =>
+                    frame.code.toLowerCase().includes(searchQuery) ||
+                    frame.title.toLowerCase().includes(searchQuery) ||
+                    frame.description.toLowerCase().includes(searchQuery) ||
+                    frame.usedOn.some(tag => tag.toLowerCase().includes(searchQuery)) ||
+                    frame.alternative.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            renderFrames(filtered);
+        }
+
+        function applyFilters() {
+            applyFiltersWithSearch();
+        }
+
         // Filter buttons
+        let currentFilter = 'all';
+
         document.querySelectorAll('#frameFilters .filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('#frameFilters .filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
 
-                const filter = btn.dataset.filter;
-                if (filter === 'all') {
-                    renderFrames(framesData);
-                } else {
-                    const filtered = framesData.filter(f => f.supplier === filter);
-                    renderFrames(filtered);
-                }
+                currentFilter = btn.dataset.filter;
+                applyFilters();
             });
         });
 
-        // View switching (Frames vs Calculator)
+        // Stock management
+        const ADMIN_PASSWORD = 'cfa2026';
+        let stockStatus = JSON.parse(localStorage.getItem('frameStockStatus') || '{}');
+
+        function saveStockStatus() {
+            localStorage.setItem('frameStockStatus', JSON.stringify(stockStatus));
+        }
+
+        function isOutOfStock(code) {
+            return stockStatus[code] === false;
+        }
+
+        function getAlternativeCodes(frame) {
+            if (!frame.alternative) return [];
+            return frame.alternative.split('/').map(s => s.trim()).filter(Boolean);
+        }
+
+        // Check if a backup frame should be shown (when its primary is out of stock)
+        function shouldShowBackupFrame(frame) {
+            if (!frame.backupOnly) return true;
+
+            // Find frames that list this backup as an alternative
+            for (const f of framesData) {
+                if (f.backupOnly) continue;
+                const altCodes = getAlternativeCodes(f);
+                if (altCodes.includes(frame.code) && isOutOfStock(f.code)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // View switching (Frames vs Calculator vs Admin)
         const framesSection = document.getElementById('framesSection');
         const calculatorSection = document.getElementById('calculatorSection');
+        const adminSection = document.getElementById('adminSection');
         const searchContainer = document.getElementById('searchContainer');
         const frameFilters = document.getElementById('frameFilters');
 
@@ -1471,16 +1729,20 @@
                 btn.classList.add('active');
 
                 const view = btn.dataset.view;
+                framesSection.style.display = 'none';
+                searchContainer.style.display = 'none';
+                frameFilters.style.display = 'none';
+                calculatorSection.style.display = 'none';
+                adminSection.style.display = 'none';
+
                 if (view === 'frames') {
                     framesSection.style.display = 'block';
                     searchContainer.style.display = 'block';
                     frameFilters.style.display = 'flex';
-                    calculatorSection.style.display = 'none';
-                } else {
-                    framesSection.style.display = 'none';
-                    searchContainer.style.display = 'none';
-                    frameFilters.style.display = 'none';
+                } else if (view === 'calculator') {
                     calculatorSection.style.display = 'block';
+                } else if (view === 'admin') {
+                    adminSection.style.display = 'block';
                 }
             });
         });
@@ -1502,8 +1764,8 @@
 
         let includeGlass = false;
 
-        // Populate frame select dropdown
-        framesData.forEach(frame => {
+        // Populate frame select dropdown (exclude backup-only frames)
+        framesData.filter(f => !f.backupOnly).forEach(frame => {
             const band = priceBands[frame.code] || '?';
             const option = document.createElement('option');
             option.value = frame.code;
@@ -1802,6 +2064,94 @@
             const filename = code ? `CFA-Quote-${code}-${quoteNum}.pdf` : `CFA-Quote-${quoteNum}.pdf`;
             doc.save(filename);
         });
+
+        // Admin functionality
+        const adminLogin = document.getElementById('adminLogin');
+        const adminPanel = document.getElementById('adminPanel');
+        const adminPassword = document.getElementById('adminPassword');
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const adminLogout = document.getElementById('adminLogout');
+        const loginError = document.getElementById('loginError');
+        const stockList = document.getElementById('stockList');
+
+        let isAdminLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true';
+
+        function showAdminPanel() {
+            adminLogin.style.display = 'none';
+            adminPanel.style.display = 'block';
+            renderStockList();
+        }
+
+        function hideAdminPanel() {
+            adminLogin.style.display = 'flex';
+            adminPanel.style.display = 'none';
+            adminPassword.value = '';
+            loginError.style.display = 'none';
+        }
+
+        if (isAdminLoggedIn) {
+            showAdminPanel();
+        }
+
+        adminLoginBtn.addEventListener('click', () => {
+            if (adminPassword.value === ADMIN_PASSWORD) {
+                isAdminLoggedIn = true;
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                showAdminPanel();
+            } else {
+                loginError.style.display = 'block';
+                adminPassword.value = '';
+            }
+        });
+
+        adminPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') adminLoginBtn.click();
+        });
+
+        adminLogout.addEventListener('click', () => {
+            isAdminLoggedIn = false;
+            sessionStorage.removeItem('adminLoggedIn');
+            hideAdminPanel();
+        });
+
+        function renderStockList() {
+            // Only show non-backup frames in stock management
+            const managedFrames = framesData.filter(f => !f.backupOnly);
+
+            stockList.innerHTML = managedFrames.map(frame => {
+                const outOfStock = isOutOfStock(frame.code);
+                return `
+                    <div class="stock-item ${outOfStock ? 'out-of-stock' : ''}" data-code="${frame.code}">
+                        <div class="stock-item-info">
+                            <span class="stock-item-code">${frame.code}</span>
+                            <span class="stock-item-title">${frame.title}</span>
+                        </div>
+                        <div class="stock-toggle ${outOfStock ? 'out-of-stock' : 'in-stock'}"
+                             data-code="${frame.code}"
+                             title="${outOfStock ? 'Out of Stock - Click to mark In Stock' : 'In Stock - Click to mark Out of Stock'}">
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add click handlers to toggles
+            document.querySelectorAll('.stock-toggle').forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const code = toggle.dataset.code;
+                    const currentlyOut = isOutOfStock(code);
+
+                    if (currentlyOut) {
+                        delete stockStatus[code];
+                    } else {
+                        stockStatus[code] = false;
+                    }
+
+                    saveStockStatus();
+                    renderStockList();
+                    renderFrames(framesData); // Refresh catalogue
+                });
+            });
+        }
     </script>
 </body>
 </html>
