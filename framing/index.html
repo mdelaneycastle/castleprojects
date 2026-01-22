@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --bg-primary: #0a0a0a;
@@ -654,6 +655,37 @@
             color: var(--accent-gold);
         }
 
+        .btn-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-row .reset-btn {
+            margin-top: 0;
+            flex: 1;
+        }
+
+        .export-btn {
+            flex: 1;
+            padding: 1rem;
+            background: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+            color: var(--bg-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: transparent;
+            color: var(--accent-gold);
+        }
+
         @media (max-width: 900px) {
             .calculator-container {
                 grid-template-columns: 1fr;
@@ -796,7 +828,10 @@
                     <span>Total Quote:</span>
                     <span id="grandTotal">£0.00</span>
                 </div>
-                <button class="reset-btn" id="resetCalc">Reset Calculator</button>
+                <div class="btn-row">
+                    <button class="reset-btn" id="resetCalc">Reset Calculator</button>
+                    <button class="export-btn" id="exportPdf">Export Quote PDF</button>
+                </div>
             </div>
         </div>
     </section>
@@ -1573,6 +1608,178 @@
             totalFrame.textContent = '£0.00';
             totalGlass.textContent = '£0.00';
             grandTotal.textContent = '£0.00';
+        });
+
+        // PDF Export
+        document.getElementById('exportPdf').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const code = frameSelect.value;
+            const frame = framesData.find(f => f.code === code);
+            const band = priceBands[code] || '-';
+            const length = lengthInput.value || '0';
+            const width = widthInput.value || '0';
+            const glassH = glassHeight.value || '0';
+            const glassW = glassWidth.value || '0';
+            const glassTypeText = glassType.options[glassType.selectedIndex].text;
+            const framePriceVal = framePrice.textContent;
+            const glassPriceVal = glassPrice.textContent;
+            const totalVal = grandTotal.textContent;
+
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('en-GB', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            });
+            const quoteNum = 'Q' + today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0') + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+
+            // Header - Logo text
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(28);
+            doc.setTextColor(30, 30, 30);
+            doc.text('CASTLE', 20, 25);
+            doc.setFont('helvetica', 'light');
+            doc.text('FINE ART', 62, 25);
+
+            // Quote info
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text('FRAMING QUOTE', 20, 35);
+            doc.text(`Date: ${dateStr}`, 150, 20, { align: 'right' });
+            doc.text(`Quote #: ${quoteNum}`, 150, 26, { align: 'right' });
+
+            // Divider
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, 42, 190, 42);
+
+            // Frame Details Section
+            let y = 55;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 30, 30);
+            doc.text('FRAME DETAILS', 20, y);
+
+            y += 10;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.setTextColor(80, 80, 80);
+
+            if (frame) {
+                doc.text(`Frame Code:`, 20, y);
+                doc.setTextColor(30, 30, 30);
+                doc.text(code, 70, y);
+
+                y += 7;
+                doc.setTextColor(80, 80, 80);
+                doc.text(`Frame Name:`, 20, y);
+                doc.setTextColor(30, 30, 30);
+                doc.text(frame.title, 70, y);
+
+                y += 7;
+                doc.setTextColor(80, 80, 80);
+                doc.text(`Price Band:`, 20, y);
+                doc.setTextColor(30, 30, 30);
+                doc.text(`Band ${band}`, 70, y);
+
+                y += 7;
+                doc.setTextColor(80, 80, 80);
+                doc.text(`Dimensions:`, 20, y);
+                doc.setTextColor(30, 30, 30);
+                doc.text(`${length} cm × ${width} cm`, 70, y);
+
+                y += 7;
+                doc.setTextColor(80, 80, 80);
+                doc.text(`Standard Glass:`, 20, y);
+                doc.setTextColor(30, 30, 30);
+                doc.text(includeGlass ? 'Included (+£50)' : 'Not included', 70, y);
+            } else {
+                doc.text('No frame selected', 20, y);
+            }
+
+            // Glazing Section
+            y += 20;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 30, 30);
+            doc.text('GLAZING UPGRADE', 20, y);
+
+            y += 10;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+
+            if (parseFloat(glassH) > 0 && parseFloat(glassW) > 0) {
+                doc.setTextColor(80, 80, 80);
+                doc.text(`Glass Size:`, 20, y);
+                doc.setTextColor(30, 30, 30);
+                doc.text(`${glassH} cm × ${glassW} cm`, 70, y);
+
+                y += 7;
+                doc.setTextColor(80, 80, 80);
+                doc.text(`Glass Type:`, 20, y);
+                doc.setTextColor(30, 30, 30);
+                const shortGlassType = glassTypeText.split(' - ')[0];
+                doc.text(shortGlassType, 70, y);
+
+                y += 7;
+                doc.setTextColor(80, 80, 80);
+                doc.text(`Area:`, 20, y);
+                doc.setTextColor(30, 30, 30);
+                doc.text(glassArea.textContent, 70, y);
+            } else {
+                doc.setTextColor(80, 80, 80);
+                doc.text('No glazing upgrade selected', 20, y);
+            }
+
+            // Price Breakdown
+            y += 25;
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, y, 190, y);
+
+            y += 15;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 30, 30);
+            doc.text('PRICE BREAKDOWN', 20, y);
+
+            y += 12;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+
+            // Frame price row
+            doc.setTextColor(80, 80, 80);
+            doc.text('Frame Price', 20, y);
+            doc.setTextColor(30, 30, 30);
+            doc.text(framePriceVal, 190, y, { align: 'right' });
+
+            y += 8;
+            doc.setTextColor(80, 80, 80);
+            doc.text('Glazing Upgrade', 20, y);
+            doc.setTextColor(30, 30, 30);
+            doc.text(glassPriceVal, 190, y, { align: 'right' });
+
+            // Total
+            y += 5;
+            doc.setDrawColor(30, 30, 30);
+            doc.line(130, y, 190, y);
+
+            y += 10;
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('TOTAL', 20, y);
+            doc.text(totalVal, 190, y, { align: 'right' });
+
+            // Footer
+            y = 270;
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(120, 120, 120);
+            doc.text('This quote is valid for 30 days from the date of issue.', 105, y, { align: 'center' });
+            doc.text('Prices are estimates and may vary based on final specifications.', 105, y + 5, { align: 'center' });
+            doc.text('Castle Fine Art | www.castlefineart.com', 105, y + 12, { align: 'center' });
+
+            // Save the PDF
+            const filename = code ? `CFA-Quote-${code}-${quoteNum}.pdf` : `CFA-Quote-${quoteNum}.pdf`;
+            doc.save(filename);
         });
     </script>
 </body>
