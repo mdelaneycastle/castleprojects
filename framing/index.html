@@ -852,6 +852,104 @@
             color: #1a1a1a;
         }
 
+        .slip-badge {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            z-index: 10;
+            background: rgba(156, 136, 255, 0.95);
+            padding: 0.3rem 0.6rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #fff;
+        }
+
+        /* Slip filter styling */
+        .filter-btn[data-filter="slip"] {
+            border-color: rgba(156, 136, 255, 0.4);
+            color: #b8a8ff;
+        }
+
+        .filter-btn[data-filter="slip"]:hover,
+        .filter-btn[data-filter="slip"].active {
+            border-color: #9c88ff;
+            color: #9c88ff;
+            background: rgba(156, 136, 255, 0.1);
+        }
+
+        /* Restock date styling */
+        .restock-date-container {
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .restock-date-container.visible {
+            display: block;
+        }
+
+        .restock-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .restock-input:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .restock-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .restock-badge {
+            font-size: 0.7rem;
+            color: #ffb74d;
+            margin-top: 0.25rem;
+        }
+
+        .out-of-stock-restock {
+            font-size: 0.6rem;
+            color: #ffb74d;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        /* Admin search */
+        .admin-search-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .admin-search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .admin-search-input:focus {
+            border-color: var(--accent-gold);
+        }
+
         @media (max-width: 900px) {
             .calculator-container {
                 grid-template-columns: 1fr;
@@ -891,6 +989,7 @@
         <button class="filter-btn active" data-filter="all">All Frames</button>
         <button class="filter-btn" data-filter="larson">Larson Juhl</button>
         <button class="filter-btn" data-filter="lion">Lion</button>
+        <button class="filter-btn" data-filter="slip">Slips</button>
     </nav>
 
     <div class="search-container" id="searchContainer">
@@ -1029,6 +1128,10 @@
                     <button class="reset-btn" id="adminLogout" style="width: auto; padding: 0.5rem 1rem;">Logout</button>
                 </div>
                 <p class="calc-subtitle">Mark frames as out of stock. When a frame is out of stock, its backup alternatives will appear in the catalogue.</p>
+
+                <div class="admin-search-container">
+                    <input type="text" class="admin-search-input" placeholder="Search by code, name, or description..." id="adminSearchInput">
+                </div>
 
                 <div class="stock-list" id="stockList">
                     <!-- Stock items will be inserted here -->
@@ -1334,7 +1437,8 @@
                 usedOn: ["NHU"],
                 alternative: "",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-essentials/lje-moulding-342703001",
-                supplier: "larson"
+                supplier: "larson",
+                isSlip: true
             },
             {
                 code: "350792",
@@ -1371,7 +1475,8 @@
                 usedOn: ["PKE"],
                 alternative: "",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-caserta-moulding-pefc-411167003",
-                supplier: "larson"
+                supplier: "larson",
+                isSlip: true
             },
             {
                 code: "411167007",
@@ -1380,7 +1485,8 @@
                 usedOn: ["PKE"],
                 alternative: "",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-caserta-moulding-pefc-411167007",
-                supplier: "larson"
+                supplier: "larson",
+                isSlip: true
             },
             {
                 code: "431167000",
@@ -1510,7 +1616,8 @@
                 alternative: "",
                 link: "",
                 supplier: "larson",
-                image: "219000178.jpg"
+                image: "219000178.jpg",
+                isSlip: true
             },
             // Lion Frames
             {
@@ -1591,13 +1698,37 @@
         // Stock management - must be defined before createFrameCard
         const ADMIN_PASSWORD = 'cfa2026';
         let stockStatus = JSON.parse(localStorage.getItem('frameStockStatus') || '{}');
+        let restockDates = JSON.parse(localStorage.getItem('frameRestockDates') || '{}');
 
         function saveStockStatus() {
             localStorage.setItem('frameStockStatus', JSON.stringify(stockStatus));
         }
 
+        function saveRestockDates() {
+            localStorage.setItem('frameRestockDates', JSON.stringify(restockDates));
+        }
+
         function isOutOfStock(code) {
             return stockStatus[code] === false;
+        }
+
+        function getRestockDate(code) {
+            return restockDates[code] || '';
+        }
+
+        function setRestockDate(code, date) {
+            if (date) {
+                restockDates[code] = date;
+            } else {
+                delete restockDates[code];
+            }
+            saveRestockDates();
+        }
+
+        function formatRestockDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
         }
 
         function getAlternativeCodes(frame) {
@@ -1630,18 +1761,22 @@
             const supplierClass = frame.supplier === 'lion' ? 'lion-supplier' : 'larson-supplier';
             const outOfStock = isOutOfStock(frame.code);
             const isBackup = frame.backupOnly;
+            const isSlip = frame.isSlip;
+            const restockDate = getRestockDate(frame.code);
 
             return `
-                <article class="frame-card ${supplierClass} ${outOfStock ? 'is-out-of-stock' : ''}" data-supplier="${frame.supplier}" data-code="${frame.code}" data-used="${frame.usedOn.join(' ')}" data-desc="${frame.description}">
+                <article class="frame-card ${supplierClass} ${outOfStock ? 'is-out-of-stock' : ''}" data-supplier="${frame.supplier}" data-code="${frame.code}" data-used="${frame.usedOn.join(' ')}" data-desc="${frame.description}" data-slip="${isSlip ? 'true' : 'false'}">
                     <div class="frame-image-container">
                         <span class="frame-code-badge">${frame.code}</span>
                         ${outOfStock ? '<span class="out-of-stock-badge">Out of Stock</span>' : `<span class="supplier-badge">${supplierName}</span>`}
                         ${isBackup ? '<span class="backup-badge">Alternative</span>' : ''}
+                        ${isSlip ? '<span class="slip-badge">Slip</span>' : ''}
                         <img src="${imageUrl}" alt="${frame.title}" class="frame-image" onerror="this.style.display='none'">
                     </div>
                     <div class="frame-content">
                         <h2 class="frame-title">${frame.title}</h2>
                         <p class="frame-description">${frame.description}</p>
+                        ${outOfStock && restockDate ? `<span class="out-of-stock-restock">Est. restock: ${formatRestockDate(restockDate)}</span>` : ''}
                         ${usedOnTags ? `<div class="frame-meta">${usedOnTags}</div>` : ''}
                         ${frame.alternative ? `<p class="frame-alternatives"><strong>Alt:</strong> ${frame.alternative}</p>` : ''}
                         ${frame.link ? `<a href="${frame.link}" target="_blank" rel="noopener noreferrer" class="frame-link">
@@ -1680,9 +1815,13 @@
         function applyFiltersWithSearch() {
             let filtered = framesData;
 
-            // Apply supplier filter
+            // Apply supplier/slip filter
             if (currentFilter !== 'all') {
-                filtered = filtered.filter(f => f.supplier === currentFilter);
+                if (currentFilter === 'slip') {
+                    filtered = filtered.filter(f => f.isSlip === true);
+                } else {
+                    filtered = filtered.filter(f => f.supplier === currentFilter);
+                }
             }
 
             // Apply search filter
@@ -2114,17 +2253,47 @@
             hideAdminPanel();
         });
 
+        // Admin search functionality
+        const adminSearchInput = document.getElementById('adminSearchInput');
+        adminSearchInput.addEventListener('input', (e) => {
+            adminSearchQuery = e.target.value.toLowerCase();
+            renderStockList();
+        });
+
+        let adminSearchQuery = '';
+
         function renderStockList() {
             // Only show non-backup frames in stock management
-            const managedFrames = framesData.filter(f => !f.backupOnly);
+            let managedFrames = framesData.filter(f => !f.backupOnly);
+
+            // Apply admin search filter
+            if (adminSearchQuery) {
+                managedFrames = managedFrames.filter(frame =>
+                    frame.code.toLowerCase().includes(adminSearchQuery) ||
+                    frame.title.toLowerCase().includes(adminSearchQuery) ||
+                    frame.description.toLowerCase().includes(adminSearchQuery)
+                );
+            }
+
+            if (managedFrames.length === 0) {
+                stockList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No frames found matching your search.</p>';
+                return;
+            }
 
             stockList.innerHTML = managedFrames.map(frame => {
                 const outOfStock = isOutOfStock(frame.code);
+                const restockDate = getRestockDate(frame.code);
+                const isSlip = frame.isSlip;
                 return `
                     <div class="stock-item ${outOfStock ? 'out-of-stock' : ''}" data-code="${frame.code}">
                         <div class="stock-item-info">
-                            <span class="stock-item-code">${frame.code}</span>
+                            <span class="stock-item-code">${frame.code}${isSlip ? ' <span style="color: #b8a8ff; font-size: 0.7rem;">(SLIP)</span>' : ''}</span>
                             <span class="stock-item-title">${frame.title}</span>
+                            <div class="restock-date-container ${outOfStock ? 'visible' : ''}" data-code="${frame.code}">
+                                <label class="restock-label">Est. restock date:</label>
+                                <input type="date" class="restock-input" data-code="${frame.code}" value="${restockDate}">
+                                ${restockDate ? `<span class="restock-badge">Restock: ${formatRestockDate(restockDate)}</span>` : ''}
+                            </div>
                         </div>
                         <div class="stock-toggle ${outOfStock ? 'out-of-stock' : 'in-stock'}"
                              data-code="${frame.code}"
@@ -2142,6 +2311,8 @@
 
                     if (currentlyOut) {
                         delete stockStatus[code];
+                        // Clear restock date when marking as in stock
+                        setRestockDate(code, '');
                     } else {
                         stockStatus[code] = false;
                     }
@@ -2149,6 +2320,16 @@
                     saveStockStatus();
                     renderStockList();
                     renderFrames(framesData); // Refresh catalogue
+                });
+            });
+
+            // Add change handlers to restock date inputs
+            document.querySelectorAll('.restock-input').forEach(input => {
+                input.addEventListener('change', () => {
+                    const code = input.dataset.code;
+                    setRestockDate(code, input.value);
+                    renderStockList();
+                    renderFrames(framesData); // Refresh catalogue to show updated date
                 });
             });
         }
