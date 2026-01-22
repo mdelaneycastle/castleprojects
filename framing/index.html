@@ -1588,6 +1588,38 @@
             },
         ];
 
+        // Stock management - must be defined before createFrameCard
+        const ADMIN_PASSWORD = 'cfa2026';
+        let stockStatus = JSON.parse(localStorage.getItem('frameStockStatus') || '{}');
+
+        function saveStockStatus() {
+            localStorage.setItem('frameStockStatus', JSON.stringify(stockStatus));
+        }
+
+        function isOutOfStock(code) {
+            return stockStatus[code] === false;
+        }
+
+        function getAlternativeCodes(frame) {
+            if (!frame.alternative) return [];
+            return frame.alternative.split('/').map(s => s.trim()).filter(Boolean);
+        }
+
+        // Check if a backup frame should be shown (when its primary is out of stock)
+        function shouldShowBackupFrame(frame) {
+            if (!frame.backupOnly) return true;
+
+            // Find frames that list this backup as an alternative
+            for (const f of framesData) {
+                if (f.backupOnly) continue;
+                const altCodes = getAlternativeCodes(f);
+                if (altCodes.includes(frame.code) && isOutOfStock(f.code)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         const arrowIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>`;
 
         function createFrameCard(frame) {
@@ -1683,38 +1715,6 @@
                 applyFilters();
             });
         });
-
-        // Stock management
-        const ADMIN_PASSWORD = 'cfa2026';
-        let stockStatus = JSON.parse(localStorage.getItem('frameStockStatus') || '{}');
-
-        function saveStockStatus() {
-            localStorage.setItem('frameStockStatus', JSON.stringify(stockStatus));
-        }
-
-        function isOutOfStock(code) {
-            return stockStatus[code] === false;
-        }
-
-        function getAlternativeCodes(frame) {
-            if (!frame.alternative) return [];
-            return frame.alternative.split('/').map(s => s.trim()).filter(Boolean);
-        }
-
-        // Check if a backup frame should be shown (when its primary is out of stock)
-        function shouldShowBackupFrame(frame) {
-            if (!frame.backupOnly) return true;
-
-            // Find frames that list this backup as an alternative
-            for (const f of framesData) {
-                if (f.backupOnly) continue;
-                const altCodes = getAlternativeCodes(f);
-                if (altCodes.includes(frame.code) && isOutOfStock(f.code)) {
-                    return true;
-                }
-            }
-            return false;
-        }
 
         // View switching (Frames vs Calculator vs Admin)
         const framesSection = document.getElementById('framesSection');
