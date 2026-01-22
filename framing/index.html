@@ -1789,6 +1789,7 @@
 
         function renderFrames(frames) {
             const grid = document.getElementById('framesGrid');
+            if (!grid) return;
 
             // Filter frames: hide backupOnly unless primary is out of stock
             const visibleFrames = frames.filter(frame => shouldShowBackupFrame(frame));
@@ -1846,11 +1847,15 @@
         let currentFilter = 'all';
 
         document.querySelectorAll('#frameFilters .filter-btn').forEach(btn => {
+            if (!btn || !btn.dataset) return;
             btn.addEventListener('click', () => {
-                document.querySelectorAll('#frameFilters .filter-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#frameFilters .filter-btn').forEach(b => {
+                    if (b) b.classList.remove('active');
+                });
                 btn.classList.add('active');
 
                 currentFilter = btn.dataset.filter;
+                if (!currentFilter) return;
                 applyFilters();
             });
         });
@@ -1863,11 +1868,15 @@
         const frameFilters = document.getElementById('frameFilters');
 
         document.querySelectorAll('.view-btn').forEach(btn => {
+            if (!btn || !btn.dataset) return;
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.view-btn').forEach(b => {
+                    if (b) b.classList.remove('active');
+                });
                 btn.classList.add('active');
 
                 const view = btn.dataset.view;
+                if (!view) return;
                 framesSection.style.display = 'none';
                 searchContainer.style.display = 'none';
                 frameFilters.style.display = 'none';
@@ -1914,8 +1923,11 @@
 
         // Glass toggle buttons
         document.querySelectorAll('.toggle-btn[data-glass]').forEach(btn => {
+            if (!btn || !btn.dataset) return;
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.toggle-btn[data-glass]').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.toggle-btn[data-glass]').forEach(b => {
+                    if (b) b.classList.remove('active');
+                });
                 btn.classList.add('active');
                 includeGlass = btn.dataset.glass === 'yes';
                 calculateFramePrice();
@@ -2216,16 +2228,18 @@
         let isAdminLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true';
 
         function showAdminPanel() {
+            if (!adminLogin || !adminPanel) return;
             adminLogin.style.display = 'none';
             adminPanel.style.display = 'block';
             renderStockList();
         }
 
         function hideAdminPanel() {
+            if (!adminLogin || !adminPanel) return;
             adminLogin.style.display = 'flex';
             adminPanel.style.display = 'none';
-            adminPassword.value = '';
-            loginError.style.display = 'none';
+            if (adminPassword) adminPassword.value = '';
+            if (loginError) loginError.style.display = 'none';
         }
 
         if (isAdminLoggedIn) {
@@ -2263,6 +2277,7 @@
         let adminSearchQuery = '';
 
         function renderStockList() {
+            if (!stockList) return;
             // Only show non-backup frames in stock management
             let managedFrames = framesData.filter(f => !f.backupOnly);
 
@@ -2305,8 +2320,10 @@
 
             // Add click handlers to toggles
             document.querySelectorAll('.stock-toggle').forEach(toggle => {
+                if (!toggle || !toggle.dataset) return;
                 toggle.addEventListener('click', () => {
                     const code = toggle.dataset.code;
+                    if (!code) return;
                     const currentlyOut = isOutOfStock(code);
 
                     if (currentlyOut) {
@@ -2325,8 +2342,10 @@
 
             // Add change handlers to restock date inputs
             document.querySelectorAll('.restock-input').forEach(input => {
+                if (!input || !input.dataset) return;
                 input.addEventListener('change', () => {
                     const code = input.dataset.code;
+                    if (!code) return;
                     setRestockDate(code, input.value);
                     renderStockList();
                     renderFrames(framesData); // Refresh catalogue to show updated date
