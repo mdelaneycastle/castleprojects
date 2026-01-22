@@ -698,7 +698,7 @@
 
         .admin-section {
             padding: 2rem;
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
@@ -740,7 +740,7 @@
         .stock-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 1rem;
             padding: 1rem 1.25rem;
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
@@ -756,10 +756,29 @@
             background: rgba(229, 115, 115, 0.05);
         }
 
+        .stock-item-image {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .stock-item-image img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
         .stock-item-info {
             display: flex;
             flex-direction: column;
             gap: 0.25rem;
+            flex: 1;
         }
 
         .stock-item-code {
@@ -771,6 +790,12 @@
         .stock-item-title {
             color: var(--text-secondary);
             font-size: 0.8rem;
+        }
+
+        .stock-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .stock-toggle {
@@ -881,41 +906,71 @@
 
         /* Restock date styling */
         .restock-date-container {
-            margin-top: 0.5rem;
             display: none;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .restock-date-container.visible {
-            display: block;
+            display: flex;
         }
 
         .restock-input {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+
+        .calendar-btn {
+            width: 36px;
+            height: 36px;
             background: var(--bg-primary);
             border: 1px solid var(--border-subtle);
-            color: var(--text-primary);
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.85rem;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-
-        .restock-input:focus {
-            border-color: var(--accent-gold);
-        }
-
-        .restock-label {
-            font-size: 0.7rem;
             color: var(--text-secondary);
-            margin-bottom: 0.25rem;
-            display: block;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .calendar-btn:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .calendar-btn svg {
+            width: 18px;
+            height: 18px;
         }
 
         .restock-badge {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: #ffb74d;
-            margin-top: 0.25rem;
+            white-space: nowrap;
+        }
+
+        .clear-date-btn {
+            width: 24px;
+            height: 24px;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+            transition: all 0.3s ease;
+        }
+
+        .clear-date-btn:hover {
+            border-color: #e57373;
+            color: #e57373;
         }
 
         .out-of-stock-restock {
@@ -966,6 +1021,16 @@
 
             .calc-group.band-display {
                 flex: 1;
+            }
+
+            .stock-item {
+                flex-wrap: wrap;
+            }
+
+            .stock-item-controls {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 0.5rem;
             }
         }
     </style>
@@ -2294,24 +2359,32 @@
                 return;
             }
 
+            const calendarIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`;
+
             stockList.innerHTML = managedFrames.map(frame => {
                 const outOfStock = isOutOfStock(frame.code);
                 const restockDate = getRestockDate(frame.code);
                 const isSlip = frame.isSlip;
+                const imageUrl = frame.image ? frame.image : `${frame.code}_4.jpg`;
                 return `
                     <div class="stock-item ${outOfStock ? 'out-of-stock' : ''}" data-code="${frame.code}">
+                        <div class="stock-item-image">
+                            <img src="${imageUrl}" alt="${frame.title}" onerror="this.style.display='none'">
+                        </div>
                         <div class="stock-item-info">
                             <span class="stock-item-code">${frame.code}${isSlip ? ' <span style="color: #b8a8ff; font-size: 0.7rem;">(SLIP)</span>' : ''}</span>
                             <span class="stock-item-title">${frame.title}</span>
-                            <div class="restock-date-container ${outOfStock ? 'visible' : ''}" data-code="${frame.code}">
-                                <label class="restock-label">Est. restock date:</label>
-                                <input type="date" class="restock-input" data-code="${frame.code}" value="${restockDate}">
-                                ${restockDate ? `<span class="restock-badge">Restock: ${formatRestockDate(restockDate)}</span>` : ''}
-                            </div>
                         </div>
-                        <div class="stock-toggle ${outOfStock ? 'out-of-stock' : 'in-stock'}"
-                             data-code="${frame.code}"
-                             title="${outOfStock ? 'Out of Stock - Click to mark In Stock' : 'In Stock - Click to mark Out of Stock'}">
+                        <div class="stock-item-controls">
+                            <div class="restock-date-container ${outOfStock ? 'visible' : ''}" data-code="${frame.code}">
+                                <input type="date" class="restock-input" data-code="${frame.code}" value="${restockDate}">
+                                <button class="calendar-btn" data-code="${frame.code}" title="Set restock date">${calendarIcon}</button>
+                                ${restockDate ? `<span class="restock-badge">${formatRestockDate(restockDate)}</span><button class="clear-date-btn" data-code="${frame.code}" title="Clear date">×</button>` : ''}
+                            </div>
+                            <div class="stock-toggle ${outOfStock ? 'out-of-stock' : 'in-stock'}"
+                                 data-code="${frame.code}"
+                                 title="${outOfStock ? 'Out of Stock - Click to mark In Stock' : 'In Stock - Click to mark Out of Stock'}">
+                            </div>
                         </div>
                     </div>
                 `;
@@ -2348,6 +2421,31 @@
                     setRestockDate(code, input.value);
                     renderStockList();
                     renderFrames(framesData); // Refresh catalogue to show updated date
+                });
+            });
+
+            // Add click handlers to calendar buttons
+            document.querySelectorAll('.calendar-btn').forEach(btn => {
+                if (!btn || !btn.dataset) return;
+                btn.addEventListener('click', () => {
+                    const code = btn.dataset.code;
+                    if (!code) return;
+                    const input = document.querySelector(`.restock-input[data-code="${code}"]`);
+                    if (input) {
+                        input.showPicker();
+                    }
+                });
+            });
+
+            // Add click handlers to clear date buttons
+            document.querySelectorAll('.clear-date-btn').forEach(btn => {
+                if (!btn || !btn.dataset) return;
+                btn.addEventListener('click', () => {
+                    const code = btn.dataset.code;
+                    if (!code) return;
+                    setRestockDate(code, '');
+                    renderStockList();
+                    renderFrames(framesData);
                 });
             });
         }
