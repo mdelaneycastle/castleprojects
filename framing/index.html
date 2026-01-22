@@ -2226,6 +2226,7 @@
         const stockList = document.getElementById('stockList');
 
         let isAdminLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true';
+        let adminSearchQuery = '';
 
         function showAdminPanel() {
             if (!adminLogin || !adminPanel) return;
@@ -2268,7 +2269,6 @@
         });
 
         // Admin search functionality
-        let adminSearchQuery = '';
         const adminSearchInput = document.getElementById('adminSearchInput');
         adminSearchInput.addEventListener('input', (e) => {
             adminSearchQuery = e.target.value.toLowerCase();
