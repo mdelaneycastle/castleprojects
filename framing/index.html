@@ -2268,13 +2268,12 @@
         });
 
         // Admin search functionality
+        let adminSearchQuery = '';
         const adminSearchInput = document.getElementById('adminSearchInput');
         adminSearchInput.addEventListener('input', (e) => {
             adminSearchQuery = e.target.value.toLowerCase();
             renderStockList();
         });
-
-        let adminSearchQuery = '';
 
         function renderStockList() {
             if (!stockList) return;
