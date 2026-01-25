@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organization Chart | Version 2</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Ambient Background -->
+  <div class="ambient-bg">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+  </div>
+
+  <!-- Noise Texture Overlay -->
+  <div class="noise-overlay"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo-container">
+        <div class="logo-mark">
+          <svg viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="20" cy="20" r="8" fill="currentColor"/>
+            <line x1="20" y1="2" x2="20" y2="12" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="20" y1="28" x2="20" y2="38" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">Organization</span>
+          <span class="logo-subtitle">Chart</span>
+        </div>
+      </div>
+
+      <div class="search-container">
+        <div class="search-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <input type="text" id="search-input" placeholder="Search employees..." autocomplete="off">
+        <div class="search-shortcut">
+          <kbd>/</kbd>
+        </div>
+        <div id="search-results" class="search-results"></div>
+      </div>
+
+      <div class="header-controls">
+        <button id="admin-btn" class="control-btn text-btn admin-btn" title="Admin Panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          <span>Admin</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Department Navigation -->
+  <nav class="department-nav">
+    <div class="nav-inner">
+      <button class="dept-btn active" data-department="all">
+        <span class="dept-indicator" style="--dept-color: linear-gradient(135deg, #d4af37, #f4d03f)"></span>
+        <span class="dept-label">All Departments</span>
+      </button>
+      <button class="dept-btn" data-department="Executive">
+        <span class="dept-indicator" style="--dept-color: #f5d742"></span>
+        <span class="dept-label">Executive</span>
+      </button>
+      <button class="dept-btn" data-department="APM / Creative Team">
+        <span class="dept-indicator" style="--dept-color: #5b9bd5"></span>
+        <span class="dept-label">Creative</span>
+      </button>
+      <button class="dept-btn" data-department="Marketing">
+        <span class="dept-indicator" style="--dept-color: #5b9bd5"></span>
+        <span class="dept-label">Marketing</span>
+      </button>
+      <button class="dept-btn" data-department="AML & Compliance">
+        <span class="dept-indicator" style="--dept-color: #9b59b6"></span>
+        <span class="dept-label">Compliance</span>
+      </button>
+      <button class="dept-btn" data-department="IT / Systems">
+        <span class="dept-indicator" style="--dept-color: #9b59b6"></span>
+        <span class="dept-label">IT</span>
+      </button>
+      <button class="dept-btn" data-department="E-commerce">
+        <span class="dept-indicator" style="--dept-color: #f4a7b9"></span>
+        <span class="dept-label">E-commerce</span>
+      </button>
+      <button class="dept-btn" data-department="Retail">
+        <span class="dept-indicator" style="--dept-color: #2c3e50"></span>
+        <span class="dept-label">Retail</span>
+      </button>
+      <button class="dept-btn" data-department="Operations">
+        <span class="dept-indicator" style="--dept-color: #f4a7b9"></span>
+        <span class="dept-label">Operations</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Org Chart Container -->
+  <main class="main-container">
+    <div id="org-chart-wrapper" class="org-chart-wrapper">
+      <div id="org-chart" class="org-chart"></div>
+    </div>
+  </main>
+
+  <!-- Employee Detail Modal -->
+  <div id="employee-modal" class="modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Close modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div class="modal-body">
+        <div class="modal-avatar-container">
+          <div class="modal-avatar-ring"></div>
+          <div class="modal-avatar" id="modal-avatar"></div>
+        </div>
+        <h2 id="modal-name"></h2>
+        <p class="modal-title" id="modal-title"></p>
+        <div class="modal-department" id="modal-department"></div>
+        <div class="modal-contact">
+          <a href="#" id="modal-email" class="contact-link">
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="M22 6L12 13L2 6"/>
+              </svg>
+            </div>
+            <span class="contact-text"></span>
+          </a>
+          <a href="#" id="modal-phone" class="contact-link">
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+              </svg>
+            </div>
+            <span class="contact-text"></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Panel Modal -->
+  <div id="admin-modal" class="modal admin-modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content admin-content">
+      <div class="admin-header">
+        <h2>Admin Panel</h2>
+        <p class="admin-subtitle">Edit employee details & reporting structure</p>
+        <button class="modal-close" aria-label="Close admin panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="admin-body">
+        <!-- Employee Selection -->
+        <div class="admin-section">
+          <label class="admin-label">Select Employee</label>
+          <div class="admin-selection-row">
+            <div class="admin-search-container admin-search-half">
+              <input type="text" id="admin-employee-search" class="admin-input" placeholder="Search by name..." autocomplete="off">
+              <div id="admin-employee-results" class="admin-dropdown"></div>
+            </div>
+            <span class="admin-or">or</span>
+            <select id="admin-employee-dropdown" class="admin-input admin-select admin-dropdown-half">
+              <option value="">Browse A-Z...</option>
+            </select>
+          </div>
+          <div id="selected-employee" class="selected-employee hidden">
+            <div class="selected-avatar" id="selected-avatar"></div>
+            <div class="selected-info">
+              <div class="selected-name" id="selected-name"></div>
+              <div class="selected-title" id="selected-title"></div>
+            </div>
+            <button class="clear-selection" id="clear-employee" title="Clear selection">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Employee Details Edit Section -->
+        <div id="employee-details-section" class="admin-section hidden">
+          <label class="admin-label">Employee Details</label>
+          <div class="edit-form">
+            <div class="edit-form-row">
+              <div class="edit-form-group">
+                <label class="edit-label">Name</label>
+                <input type="text" id="edit-name" class="admin-input" placeholder="Full name">
+              </div>
+              <div class="edit-form-group">
+                <label class="edit-label">Title</label>
+                <input type="text" id="edit-title" class="admin-input" placeholder="Job title">
+              </div>
+            </div>
+            <div class="edit-form-row">
+              <div class="edit-form-group">
+                <label class="edit-label">Email</label>
+                <input type="email" id="edit-email" class="admin-input" placeholder="email@example.com">
+              </div>
+              <div class="edit-form-group">
+                <label class="edit-label">Phone</label>
+                <input type="tel" id="edit-phone" class="admin-input" placeholder="0121 123 4567">
+              </div>
+            </div>
+            <div class="edit-form-row">
+              <div class="edit-form-group">
+                <label class="edit-label">Department</label>
+                <select id="edit-department" class="admin-input admin-select">
+                  <option value="Executive">Executive</option>
+                  <option value="APM / Creative Team">APM / Creative Team</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="AML & Compliance">AML & Compliance</option>
+                  <option value="IT / Systems">IT / Systems</option>
+                  <option value="E-commerce">E-commerce</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Retail Support">Retail Support</option>
+                  <option value="Pre Sales">Pre Sales</option>
+                  <option value="Post Sales">Post Sales</option>
+                  <option value="Inventory">Inventory</option>
+                  <option value="Client Services">Client Services</option>
+                  <option value="Retail Analysis">Retail Analysis</option>
+                  <option value="Operations">Operations</option>
+                  <option value="Manufacture & Quality Control">Manufacture & Quality Control</option>
+                  <option value="Mounting">Mounting</option>
+                  <option value="Quality Control">Quality Control</option>
+                  <option value="Framing Finishing">Framing Finishing</option>
+                  <option value="Chop & Pin">Chop & Pin</option>
+                  <option value="Packing">Packing</option>
+                  <option value="Logistics">Logistics</option>
+                </select>
+              </div>
+              <div class="edit-form-group">
+                <label class="edit-label">Avatar Filename</label>
+                <input type="text" id="edit-avatar" class="admin-input" placeholder="firstname-lastname.png">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Current Manager Display -->
+        <div id="current-manager-section" class="admin-section hidden">
+          <label class="admin-label">Current Manager</label>
+          <div id="current-manager" class="current-manager">
+            <div class="manager-avatar" id="current-manager-avatar"></div>
+            <div class="manager-info">
+              <div class="manager-name" id="current-manager-name"></div>
+              <div class="manager-title" id="current-manager-title"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Manager Selection -->
+        <div id="new-manager-section" class="admin-section hidden">
+          <label class="admin-label">Assign New Manager</label>
+          <div class="admin-search-container">
+            <input type="text" id="admin-manager-search" class="admin-input" placeholder="Search for a manager..." autocomplete="off">
+            <div id="admin-manager-results" class="admin-dropdown"></div>
+          </div>
+          <div id="selected-manager" class="selected-employee hidden">
+            <div class="selected-avatar" id="new-manager-avatar"></div>
+            <div class="selected-info">
+              <div class="selected-name" id="new-manager-name"></div>
+              <div class="selected-title" id="new-manager-title"></div>
+            </div>
+            <button class="clear-selection" id="clear-manager" title="Clear selection">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Warning Message -->
+        <div id="admin-warning" class="admin-warning hidden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span id="admin-warning-text"></span>
+        </div>
+      </div>
+
+      <div class="admin-footer">
+        <div class="admin-footer-left">
+          <button id="admin-export" class="admin-btn-export" title="Download data.js file">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export data.js
+          </button>
+          <button id="admin-reset" class="admin-btn-danger" title="Reset to original data">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+            Reset
+          </button>
+        </div>
+        <div class="admin-footer-right">
+          <button id="admin-cancel" class="admin-btn-secondary">Cancel</button>
+          <button id="admin-save" class="admin-btn-primary" disabled>Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
