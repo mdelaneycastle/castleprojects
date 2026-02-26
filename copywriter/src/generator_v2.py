@@ -101,13 +101,20 @@ Output with these exact headings:
 - "Avoid list" of words/phrases that break the voice
 
 6) Phrase Bank
-- 25-40 reusable phrases/stems pulled directly from the source material, grouped by function:
+- 25-40 reusable phrases/stems grouped by function:
   openers / transitions / technique / emotion / context / closers / calls-to-action
+- These must be STRUCTURAL PATTERNS, not specific facts. Use bracket placeholders for any variable content.
+- WRONG: "Castle Fine Art will donate £100 to Birmingham Children's Hospital"
+- RIGHT: "Castle Fine Art will donate [amount] to [charity]" or just describe the pattern: "Charity tie-in sentence linking purchase to local cause"
+- WRONG: "Inspired by the infamous Peaky Blinders gang"
+- RIGHT: "Inspired by [cultural/historical reference]..."
 
 7) Reusable Templates
-A) Press release template (with bracket placeholders)
+A) Press release template (with bracket placeholders for ALL specific details)
 B) Product description template (shorter)
 C) 50-word "gallery caption" template
+- Templates must contain ZERO specific facts from the source documents.
+- Every detail (names, prices, charities, collection titles, subjects) must be a bracket placeholder.
 
 8) Style Stress Test
 - 6 common mistakes writers make when trying this voice, and how to fix them
@@ -115,11 +122,14 @@ C) 50-word "gallery caption" template
 9) Two mini sample paragraphs (style-only demonstration)
 - One "press release opening" paragraph (80-120 words)
 - One "product description" paragraph (60-90 words)
+- Use bracket placeholders for any specific details. These demonstrate VOICE, not content.
 
-Important:
-- Do not invent biographical facts that aren't in the documents.
-- When in doubt, generalise safely rather than fabricating specifics.
-- Every rule and example must be traceable back to something in the corpus."""
+CRITICAL RULES:
+- The style guide must capture HOW this artist is written about, not WHAT was written about.
+- Strip out ALL specific facts from previous releases (charity amounts, collection names, exhibition dates, specific subjects, pricing). These belong to past campaigns and must NOT be recycled into future copy.
+- The only reusable facts are: the artist's name, their hometown/background, their core techniques, and their general artistic philosophy.
+- Everything else (subjects, collections, prices, charity tie-ins, exhibition details) changes with every release and must be provided fresh by the user.
+- When in doubt, use a bracket placeholder rather than a specific fact."""
 
         response = self.openai.chat.completions.create(
             model="gpt-4o",
@@ -167,23 +177,36 @@ class CopyGeneratorV2:
         content = []
 
         # Text prompt
-        prompt = f"""Here is a detailed style guide based on previous writing about this artist:
+        prompt = f"""You are writing copy for Castle Fine Art gallery.
 
---- STYLE GUIDE ---
+Below is a STYLE GUIDE that describes HOW to write — the voice, tone, structure,
+cadence, and narrative devices to use. It was derived from previous documents about
+this artist.
+
+--- STYLE GUIDE (voice and structure rules only) ---
 {style_guide}
 --- END STYLE GUIDE ---
 
-Now, using this exact style, write a {doc_type.replace('_', ' ')} based on the following:
+Below is the USER BRIEF — this is the ONLY source of facts for the copy you write.
+Every specific detail (collection name, artwork titles, subjects depicted, prices,
+charity information, exhibition dates) must come from the brief below or from
+the attached images. Do NOT recycle specific facts, charity amounts, collection
+names, or event details from the style guide — those are from past campaigns.
 
+--- USER BRIEF ---
 {context}
+--- END USER BRIEF ---
 
-IMPORTANT:
-- Always refer to the gallery as "Castle Fine Art" (never "Castle Galleries")
-- Use British English throughout (colour, favour, centre, catalogue)
-- Never use American expressions like "price tag", "check out", "awesome", "amazing"
-- For pricing, say "priced at £X" or "available at £X"
+Write a {doc_type.replace('_', ' ')} that:
+1. Follows the style guide for voice, tone, structure, and cadence
+2. Uses ONLY the facts provided in the user brief and images above
+3. Does not invent facts that are not in the brief (if details are missing, leave them out or use general language)
+4. Refers to the gallery as "Castle Fine Art" (never "Castle Galleries")
+5. Uses British English throughout (colour, favour, centre, catalogue)
+6. Avoids American expressions ("price tag", "check out", "awesome", "amazing")
+7. For pricing, uses "priced at £X" or "available at £X" (only if prices are provided in the brief)
 
-Write the {doc_type.replace('_', ' ')} now, matching the style guide closely."""
+Write the {doc_type.replace('_', ' ')} now."""
 
         content.append({
             "type": "text",
