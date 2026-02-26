@@ -15,6 +15,46 @@ st.set_page_config(
     layout="wide"
 )
 
+
+# --- Password Gate ---
+def check_password():
+    """Block access until correct password is entered."""
+    if st.session_state.get("authenticated"):
+        return True
+
+    # Get password from secrets, fall back to env var
+    try:
+        correct_password = st.secrets["APP_PASSWORD"]
+    except Exception:
+        correct_password = os.getenv("APP_PASSWORD", "")
+
+    # Inject CSS to blur everything behind the login overlay
+    st.markdown("""
+    <style>
+    [data-testid="stSidebar"] { display: none; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Centred login form
+    col1, col2, col3 = st.columns([1, 1.5, 1])
+    with col2:
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.markdown("### CopyWriter V2")
+        st.caption("Enter your password to continue")
+        password = st.text_input("Password", type="password", key="password_input")
+        if st.button("Sign in", type="primary", use_container_width=True):
+            if password == correct_password:
+                st.session_state.authenticated = True
+                st.rerun()
+            else:
+                st.error("Incorrect password.")
+    return False
+
+
+if not check_password():
+    st.stop()
+
+
 from supabase_storage import (
     get_artists,
     create_artist,
