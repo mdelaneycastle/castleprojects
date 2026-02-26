@@ -1,6 +1,5 @@
 """
-Generator V2 - Simplified ChatGPT-like approach
-Uses GPT-4o with natural conversation flow for better results.
+Generator V2 - Style analysis and copy generation.
 """
 
 import base64
@@ -16,7 +15,6 @@ def encode_image_to_base64(image_bytes: bytes) -> str:
 class StyleAnalyzerV2:
     """
     Analyzes documents and produces natural language style guidance.
-    Mimics how you'd ask ChatGPT to analyze writing style.
     """
 
     def __init__(self, api_key: str):
@@ -144,10 +142,111 @@ CRITICAL RULES:
         return response.choices[0].message.content.strip()
 
 
+FORMAT_RULES = {
+    "press_release": """FORMAT: PRESS RELEASE
+Length: 500-750 words (hard requirement — do not go shorter)
+Paragraphs: 6-8 short paragraphs with strong rhythm
+
+Structure (follow this order):
+1. Headline (single line, no quotes)
+2. Subhead (single line — location, date, one-sentence summary)
+3. Atmospheric opening paragraph — set the mood, anchor in place/culture
+4. Artist context paragraph — who they are, their background, artistic intent
+5. Collection overview paragraph — what unites the works thematically and emotionally
+6. Individual works paragraph(s) — discuss works in narrative groupings, NOT as a list
+7. Technique and process paragraph — how the work is made, linked to emotion
+8. Emotional/cultural meaning paragraph — what the viewer is invited to feel
+9. Closing paragraph — legacy, collectability, cultural significance
+10. "Notes to Editors" section — 3-6 bullet points (who/what/where/availability)
+11. Boilerplate — 80-120 words about Castle Fine Art and the artist (general, no campaign-specific facts)
+
+At least one quote from the artist (if no exact quote is provided in the brief, write:
+"The artist reflects on..." or similar WITHOUT quotation marks).
+Write expansively and narratively. Never summarise. Avoid list-like structure in the body.""",
+
+    "collection_overview": """FORMAT: COLLECTION OVERVIEW
+Length: 350-500 words (hard requirement — do not go shorter)
+Paragraphs: 4-6, flowing editorial tone
+
+Structure:
+1. Collection theme and mood — the cultural/historical hook
+2. Artist connection to the subject — why this matters to them
+3. What the collection explores emotionally and thematically
+4. Key works described as a group (not listed individually)
+5. Technique, atmosphere, and light/shadow
+6. Closing emotional statement — what the viewer takes away
+
+No "Notes to Editors". No boilerplate.
+Less formal than a press release but still narrative-driven.
+Focus on journey, influences, signature approach, and feeling.""",
+
+    "bio": """FORMAT: ARTIST BIO
+Length: 250-350 words (hard requirement — do not go shorter)
+Paragraphs: 3-5
+
+Structure:
+1. Opening — who they are, where they're from, what defines their practice
+2. Artistic journey — background, influences, development
+3. Technique and approach — how they work, what makes it distinctive
+4. Themes and philosophy — what drives them, what they explore
+5. Current standing — where they are now, gallery representation
+
+Write in third person. Editorial tone, not marketing tone.
+Must feel like a gallery biography, not a sales pitch.""",
+
+    "general": """FORMAT: GENERAL COPY
+Length: 300-450 words (hard requirement — do not go shorter)
+Paragraphs: 4-6
+
+Hybrid of overview and soft call-to-action.
+No "Notes to Editors" unless explicitly requested.
+Write narratively — atmosphere first, facts woven in.""",
+
+    "paid_ads": """FORMAT: PAID ADVERTISING COPY
+Generate multiple ad variants for both Meta and Google.
+
+META ADS (generate 5 variants of each):
+- Body copy: 50-150 characters each
+- Headline: max 27 characters each
+
+GOOGLE ADS (generate 5 variants of each):
+- Headlines: max 30 characters each
+- Descriptions: max 90 characters each
+
+Rules:
+- Every variant must be within the character limits (count carefully)
+- Each variant should take a different angle (emotion, technique, place, legacy, urgency)
+- Match the artist's voice but compressed — punchy, evocative, no filler
+- Include at least one variant with a clear call-to-action
+- No quotation marks in ad copy
+- British English throughout
+
+Output format:
+META ADS
+Body Copy:
+1. [copy] (X chars)
+2. [copy] (X chars)
+...
+Headlines:
+1. [copy] (X chars)
+2. [copy] (X chars)
+...
+
+GOOGLE ADS
+Headlines:
+1. [copy] (X chars)
+2. [copy] (X chars)
+...
+Descriptions:
+1. [copy] (X chars)
+2. [copy] (X chars)
+...""",
+}
+
+
 class CopyGeneratorV2:
     """
-    Generates copy using GPT-4o with vision.
-    Simple, conversational approach like ChatGPT.
+    Generates copy with vision support.
     """
 
     def __init__(self, api_key: str):
@@ -165,13 +264,14 @@ class CopyGeneratorV2:
 
         Args:
             style_guide: Natural language style guide from analysis
-            doc_type: Type of document (press_release, bio, collection_overview)
+            doc_type: Type of document (press_release, bio, collection_overview, paid_ads)
             context: User-provided context about what to write
             images: List of dicts with 'bytes' and 'description' keys
 
         Returns:
             Generated copy
         """
+        format_rules = FORMAT_RULES.get(doc_type, FORMAT_RULES["general"])
 
         # Build the message content
         content = []
@@ -197,16 +297,21 @@ names, or event details from the style guide — those are from past campaigns.
 {context}
 --- END USER BRIEF ---
 
-Write a {doc_type.replace('_', ' ')} that:
-1. Follows the style guide for voice, tone, structure, and cadence
-2. Uses ONLY the facts provided in the user brief and images above
-3. Does not invent facts that are not in the brief (if details are missing, leave them out or use general language)
-4. Refers to the gallery as "Castle Fine Art" (never "Castle Galleries")
-5. Uses British English throughout (colour, favour, centre, catalogue)
-6. Avoids American expressions ("price tag", "check out", "awesome", "amazing")
-7. For pricing, uses "priced at £X" or "available at £X" (only if prices are provided in the brief)
+--- OUTPUT REQUIREMENTS (mandatory — do not ignore) ---
+{format_rules}
+--- END OUTPUT REQUIREMENTS ---
 
-Write the {doc_type.replace('_', ' ')} now."""
+Additional rules:
+1. Follow the style guide for voice, tone, and cadence
+2. Use ONLY facts from the user brief and images — do not invent details
+3. If key facts are missing, write around them with general language rather than placeholders or invented details
+4. Refer to the gallery as "Castle Fine Art" (never "Castle Galleries")
+5. Use British English throughout (colour, favour, centre, catalogue)
+6. No generic filler ("stunning", "amazing", "check out", "awesome")
+7. For pricing, use "priced at £X" or "available at £X" (only if prices are in the brief)
+8. If the output reads like a short marketing blurb, it is wrong — expand with narrative detail
+
+Write now."""
 
         content.append({
             "type": "text",
@@ -234,7 +339,7 @@ Write the {doc_type.replace('_', ' ')} now."""
                 }
             ],
             temperature=0.7,
-            max_tokens=3000
+            max_tokens=4000
         )
 
         return response.choices[0].message.content.strip()
@@ -246,7 +351,7 @@ Write the {doc_type.replace('_', ' ')} now."""
         images: list[dict] = None
     ) -> str:
         """
-        Even simpler - just pass through a natural prompt like you would to ChatGPT.
+        Even simpler - just pass through a natural prompt.
 
         Args:
             style_guide: Natural language style guide

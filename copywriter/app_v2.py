@@ -1,5 +1,5 @@
 """
-CopyWriter V2 - Supabase-backed version
+CopyWriter V2
 A streamlined copywriting tool with cloud storage.
 """
 
@@ -202,7 +202,7 @@ if page == "Style Guide":
         )
 
         if st.button(button_label, type="primary", disabled=not has_docs):
-            with st.spinner("Analysing documents with GPT-4o... This may take a moment."):
+            with st.spinner("Analysing documents... This may take a moment."):
                 from src.generator_v2 import StyleAnalyzerV2
 
                 # Build document list from extracted text in DB
@@ -235,7 +235,7 @@ if page == "Style Guide":
 # ============================================
 elif page == "Generate Copy":
     st.title("Generate Copy")
-    st.caption("Simple, natural generation like ChatGPT")
+    st.caption("Describe what you need, get copy in the artist's voice")
 
     artist = st.session_state.current_artist
     if not artist:
@@ -254,20 +254,25 @@ elif page == "Generate Copy":
         st.markdown("### What would you like to write?")
 
         context = st.text_area(
-            "Describe what you want (like you're talking to ChatGPT)",
-            placeholder='Example: "The new pieces are attached. Based on Peaky Blinders. '
-            'The Garrison piece shows Arthur Shelby, the Faith piece shows Polly, '
-            'the Soldier\'s Minute shows Thomas Shelby, and the Black Patch shows '
-            'Thomas, Arthur and John Shelby - all brothers from the show. '
-            'Can you generate some copy for a press release in the style '
-            'we\'ve used previously?"',
+            "Describe what you want to write about",
+            placeholder='Example: "The new pieces are based on Peaky Blinders. '
+            'The Garrison piece shows Arthur Shelby, Faith shows Polly, '
+            'Soldier\'s Minute shows Thomas Shelby, and Black Patch shows '
+            'Thomas, Arthur and John Shelby. '
+            'Please generate a press release for this collection."',
             height=150,
         )
 
         doc_type = st.selectbox(
             "Document Type",
-            ["press_release", "bio", "collection_overview", "general"],
-            format_func=lambda x: x.replace('_', ' ').title(),
+            ["press_release", "collection_overview", "bio", "paid_ads", "general"],
+            format_func=lambda x: {
+                'press_release': 'Press Release',
+                'collection_overview': 'Collection Overview',
+                'bio': 'Artist Bio',
+                'paid_ads': 'Paid Ads (Meta + Google)',
+                'general': 'General',
+            }.get(x, x.replace('_', ' ').title()),
         )
 
         # Image upload
@@ -291,7 +296,7 @@ elif page == "Generate Copy":
             if not context.strip():
                 st.error("Please describe what you want to write.")
             else:
-                with st.spinner("Generating copy with GPT-4o..."):
+                with st.spinner("Generating copy..."):
                     from src.generator_v2 import CopyGeneratorV2
 
                     generator = CopyGeneratorV2(get_api_key())
@@ -400,10 +405,10 @@ elif page == "Settings":
 
     st.markdown("### About")
     st.markdown("""
-    **CopyWriter V2** uses GPT-4o to reverse-engineer an artist's writing voice
-    from existing documents, then generates new copy in that exact style.
+    **CopyWriter V2** reverse-engineers an artist's writing voice from existing
+    documents, then generates new copy in that exact style.
 
     1. **Upload** source documents (press releases, bios, collection overviews)
-    2. **Generate** a style guide — the AI builds a reusable voice system
+    2. **Generate** a style guide — builds a reusable voice system
     3. **Write** new copy by describing what you need in plain English
     """)
