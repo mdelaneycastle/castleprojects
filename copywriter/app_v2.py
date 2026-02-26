@@ -23,6 +23,9 @@ from supabase_storage import (
     get_documents,
     upload_document,
     delete_document,
+    save_generated_copy,
+    get_generated_copy,
+    delete_generated_copy,
 )
 
 SUPPORTED_EXTENSIONS = {'.docx', '.pdf', '.html', '.htm', '.doc', '.txt'}
@@ -292,6 +295,14 @@ elif page == "Generate Copy":
 
         st.markdown("---")
 
+        DOC_TYPE_LABELS = {
+            'press_release': 'Press Release',
+            'collection_overview': 'Collection Overview',
+            'bio': 'Artist Bio',
+            'paid_ads': 'Paid Ads',
+            'general': 'General',
+        }
+
         if st.button("Generate Copy", type="primary", use_container_width=True):
             if not context.strip():
                 st.error("Please describe what you want to write.")
@@ -320,9 +331,17 @@ elif page == "Generate Copy":
                         images=images,
                     )
 
+                    # Save to database
+                    save_generated_copy(
+                        artist_id=artist['id'],
+                        doc_type=doc_type,
+                        user_brief=context,
+                        content=result,
+                    )
+
                     st.session_state.generated_copy_v2 = result
 
-                st.success("Copy generated!")
+                st.success("Copy generated and saved!")
 
         if st.session_state.generated_copy_v2:
             st.markdown("---")
@@ -336,6 +355,34 @@ elif page == "Generate Copy":
                 height=300,
                 label_visibility="collapsed",
             )
+
+        # --- Copy History ---
+        st.markdown("---")
+        st.markdown("### Copy History")
+
+        history = get_generated_copy(artist['id'])
+        if history:
+            for item in history:
+                label = DOC_TYPE_LABELS.get(item['doc_type'], item['doc_type'])
+                created = item['created_at'][:16].replace('T', ' ')
+                brief_preview = (item['user_brief'] or '')[:80]
+                if len(item.get('user_brief', '') or '') > 80:
+                    brief_preview += '...'
+
+                with st.expander(f"{label} — {created} — {brief_preview}"):
+                    st.markdown(item['content'])
+                    st.text_area(
+                        "Copy to clipboard",
+                        value=item['content'],
+                        height=200,
+                        key=f"copy_{item['id']}",
+                        label_visibility="collapsed",
+                    )
+                    if st.button("Delete", key=f"del_copy_{item['id']}"):
+                        delete_generated_copy(item['id'])
+                        st.rerun()
+        else:
+            st.caption("No copy generated yet for this artist.")
 
 
 # ============================================

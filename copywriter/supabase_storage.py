@@ -142,3 +142,37 @@ def delete_document(doc_id: str, storage_path: str | None = None) -> None:
         except Exception:
             pass  # file may already be gone
     get_supabase().table("documents").delete().eq("id", doc_id).execute()
+
+
+# --- Generated Copy ---
+
+def save_generated_copy(artist_id: str, doc_type: str, user_brief: str, content: str) -> dict:
+    """Save a piece of generated copy."""
+    response = (
+        get_supabase().table("generated_copy")
+        .insert({
+            "artist_id": artist_id,
+            "doc_type": doc_type,
+            "user_brief": user_brief,
+            "content": content,
+        })
+        .execute()
+    )
+    return response.data[0]
+
+
+def get_generated_copy(artist_id: str) -> list[dict]:
+    """Get all generated copy for an artist, newest first."""
+    response = (
+        get_supabase().table("generated_copy")
+        .select("*")
+        .eq("artist_id", artist_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return response.data
+
+
+def delete_generated_copy(copy_id: str) -> None:
+    """Delete a piece of generated copy."""
+    get_supabase().table("generated_copy").delete().eq("id", copy_id).execute()
