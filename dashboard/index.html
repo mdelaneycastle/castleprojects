@@ -1,0 +1,2258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Dashboard - Gallery Performance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #08090c;
+            --bg-primary: #0d0f14;
+            --bg-card: #12151c;
+            --bg-card-hover: #171b24;
+            --bg-elevated: #1a1e28;
+            --accent-gold: #d4af37;
+            --accent-gold-light: #e8c44a;
+            --accent-gold-dim: #9a7b1f;
+            --accent-gold-glow: rgba(212, 175, 55, 0.15);
+            --text-primary: #f5f5f4;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border-subtle: rgba(255,255,255,0.05);
+            --border-gold: rgba(212, 175, 55, 0.25);
+            --success: #22c55e;
+            --success-dim: rgba(34, 197, 94, 0.15);
+            --warning: #eab308;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            font-size: 18px;
+        }
+
+        /* Sophisticated background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(212, 175, 55, 0.04) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-primary) 100%);
+            z-index: -2;
+        }
+
+        /* Subtle grid pattern */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(212, 175, 55, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212, 175, 55, 0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        /* Header - Fixed */
+        .header {
+            background: linear-gradient(180deg, var(--bg-card) 0%, rgba(18, 21, 28, 0.95) 100%);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 24px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .header-title h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 34px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-title span {
+            font-size: 14px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .header-totals {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-total-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .header-total-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .header-total-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .header-total-value.gold {
+            color: var(--accent-gold);
+            font-size: 32px;
+        }
+
+        .header-total-value.business {
+            color: var(--text-secondary);
+            font-size: 24px;
+        }
+
+        .header-total-sep {
+            width: 1px;
+            height: 36px;
+            background: var(--border-subtle);
+        }
+
+        .header-total-sep.wide {
+            margin-left: 12px;
+            margin-right: 12px;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .date-display {
+            text-align: right;
+        }
+
+        .date-display .date {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .date-display .time {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .header-status-label {
+            color: var(--text-muted);
+        }
+
+        .header-status-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .header-status-value.green {
+            color: var(--success);
+        }
+
+        .header-status-sep {
+            color: var(--text-muted);
+            opacity: 0.4;
+            margin: 0 2px;
+        }
+
+        .tv-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-gold);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tv-indicator .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.9); }
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Grand Total Sidebar */
+        .grand-total-sidebar {
+            width: 360px;
+            flex-shrink: 0;
+            background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-primary) 100%);
+            border-right: 1px solid var(--border-subtle);
+            padding: 32px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .total-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-gold);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .total-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+        }
+
+        .total-card.primary {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+        }
+
+        .total-card.primary::after {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, var(--accent-gold-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .total-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 8px;
+        }
+
+        .total-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 44px;
+            font-weight: 600;
+            color: var(--accent-gold);
+            line-height: 1;
+        }
+
+        .total-value.small {
+            font-size: 24px;
+            color: var(--text-primary);
+        }
+
+        .total-value.business {
+            color: var(--text-secondary);
+        }
+
+        .total-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-value.gold {
+            color: var(--accent-gold);
+        }
+
+        .stat-value.green {
+            color: var(--success);
+        }
+
+        .big-sale-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 12px;
+        }
+
+        /* Gallery Carousel Section */
+        .gallery-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 28px 36px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .page-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            transition: all 0.3s ease;
+        }
+
+        .page-dot.active {
+            background: var(--accent-gold);
+            border-color: var(--accent-gold);
+            transform: scale(1.2);
+        }
+
+        /* Gallery Grid Container */
+        .gallery-carousel {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gallery-page {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 18px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gallery-page.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .gallery-page.exit {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+
+        .gallery-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-gold-dim), var(--accent-gold), var(--accent-gold-dim));
+            opacity: 0.5;
+        }
+
+        .gallery-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .gallery-name {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .gallery-code {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: var(--bg-elevated);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .gallery-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .metric-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .metric-columns {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .metric-group-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .metric-hero {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+
+        .metric-hero.yesterday { color: var(--accent-gold); }
+        .metric-hero.monthly { color: var(--success); }
+
+        .metric-breakdown {
+            display: flex;
+            gap: 20px;
+        }
+
+        .metric-breakdown-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .metric-breakdown-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .metric-breakdown-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .metric-breakdown-value.highlight {
+            color: var(--accent-gold);
+        }
+
+        .metric-breakdown-value.business {
+            color: var(--text-secondary);
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .metric-value.yesterday {
+            color: var(--accent-gold);
+        }
+
+        .metric-value.monthly {
+            color: var(--success);
+        }
+
+        .metric-value.business {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .zero-days-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .zero-days-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+
+        .zero-days-value {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .zero-days-value.no-zeros {
+            color: var(--success);
+        }
+
+        .zero-days-value.has-zeros {
+            color: var(--danger);
+        }
+
+        .target-bar {
+            margin-top: 8px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .target-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .target-progress {
+            height: 6px;
+            background: var(--bg-elevated);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .target-progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .target-progress-fill.under {
+            background: linear-gradient(90deg, var(--danger), #f87171);
+        }
+
+        .target-progress-fill.close {
+            background: linear-gradient(90deg, var(--warning), #fcd34d);
+        }
+
+        .target-progress-fill.on-target {
+            background: linear-gradient(90deg, var(--success), #4ade80);
+        }
+
+        .target-progress-fill.over {
+            background: linear-gradient(90deg, #22d3ee, #06b6d4);
+        }
+
+        .target-percent {
+            font-size: 18px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .target-percent.under {
+            color: var(--danger);
+        }
+
+        .target-percent.close {
+            color: var(--warning);
+        }
+
+        .target-percent.on-target {
+            color: var(--success);
+        }
+
+        .target-percent.over {
+            color: #22d3ee;
+        }
+
+        .target-amount {
+            font-size: 16px;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* League Table Sidebar */
+        .league-sidebar {
+            width: 360px;
+            flex-shrink: 0;
+            background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-primary) 100%);
+            border-left: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .league-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .league-section:last-child {
+            border-bottom: none;
+        }
+
+        .league-header {
+            padding: 10px 24px;
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border-gold);
+            border-top: 1px solid var(--border-gold);
+            flex-shrink: 0;
+        }
+
+        .league-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .league-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .league-list {
+            position: absolute;
+            width: 100%;
+            transition: transform 0.5s ease-out;
+        }
+
+        .league-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            gap: 12px;
+        }
+
+        .league-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .league-rank.gold {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
+            color: var(--bg-deep);
+        }
+
+        .league-rank.silver {
+            background: linear-gradient(135deg, #9ca3af, #d1d5db);
+            color: var(--bg-deep);
+        }
+
+        .league-rank.bronze {
+            background: linear-gradient(135deg, #b45309, #d97706);
+            color: var(--bg-deep);
+        }
+
+        .league-rank.normal {
+            background: var(--bg-elevated);
+            color: var(--text-muted);
+        }
+
+        .league-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .league-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .league-target-value {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .league-percent {
+            font-size: 16px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .league-percent.under { color: var(--danger); }
+        .league-percent.close { color: var(--warning); }
+        .league-percent.on-target { color: var(--success); }
+        .league-percent.over { color: #22d3ee; }
+
+        .metric-divider {
+            display: none;
+        }
+
+        /* Progress bar at bottom */
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--bg-elevated);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-gold-dim), var(--accent-gold));
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Responsive for different TV sizes */
+        @media (max-width: 1600px) {
+            .grand-total-sidebar {
+                width: 280px;
+            }
+            .league-sidebar {
+                width: 280px;
+            }
+        }
+
+        @media (max-width: 1400px) {
+            .grand-total-sidebar {
+                width: 260px;
+                padding: 24px 20px;
+            }
+            .league-sidebar {
+                width: 260px;
+            }
+            .gallery-page {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(2, 1fr);
+            }
+        }
+
+        /* Loading state */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-deep);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border-subtle);
+            border-top-color: var(--accent-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .sidebar-stacked {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-stacked:last-child {
+            margin-bottom: 0;
+        }
+
+        .sidebar-stacked-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 2px;
+        }
+
+        .sidebar-stacked-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 30px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+
+        .sidebar-stacked-value.gold {
+            color: var(--accent-gold);
+        }
+
+        .sidebar-stacked-value.muted {
+            color: var(--text-secondary);
+            font-size: 24px;
+        }
+
+        /* ========== MOBILE LAYOUT ========== */
+        .mobile-layout { display: none; }
+
+        @media (max-width: 768px) {
+            html, body {
+                height: 100%;
+                overflow: hidden;
+            }
+
+            body { font-size: 14px; }
+            body::before, body::after { display: none; }
+
+            .header {
+                padding: 12px 16px;
+                gap: 8px;
+            }
+
+            .header-title h1 { font-size: 20px; }
+            .header-title span { font-size: 10px; }
+            .header-totals { display: none; }
+            .header-meta .header-status { display: none; }
+            .tv-indicator { display: none; }
+            .date-display .date { font-size: 13px; }
+            .date-display .time { font-size: 11px; }
+            .main-layout { display: none !important; }
+            .progress-bar { display: none; }
+            .loading-overlay { position: fixed; }
+
+            .mobile-layout {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                overflow: hidden;
+            }
+
+            /* Bottom Nav */
+            .mobile-nav {
+                display: flex;
+                background: var(--bg-card);
+                border-top: 1px solid var(--border-subtle);
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                padding-bottom: env(safe-area-inset-bottom, 0);
+            }
+
+            .mobile-nav-btn {
+                flex: 1;
+                padding: 10px 8px 8px;
+                background: none;
+                border: none;
+                color: var(--text-muted);
+                font-family: 'Outfit', sans-serif;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                transition: color 0.2s;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .mobile-nav-btn svg {
+                width: 22px;
+                height: 22px;
+                stroke: currentColor;
+                fill: none;
+                stroke-width: 1.5;
+            }
+
+            .mobile-nav-btn.active {
+                color: var(--accent-gold);
+            }
+
+            /* Mobile Content */
+            .mobile-content {
+                flex: 1;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 70px;
+            }
+
+            .mobile-tab {
+                display: none;
+                padding: 16px;
+            }
+
+            .mobile-tab.active { display: block; }
+
+            /* Summary Cards */
+            .mobile-card {
+                background: var(--bg-card);
+                border: 1px solid var(--border-subtle);
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 10px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .mobile-card.gold-top::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+            }
+
+            .mobile-card-title {
+                font-size: 11px;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+
+            .mobile-hero {
+                font-family: 'Playfair Display', serif;
+                font-size: 32px;
+                font-weight: 700;
+                line-height: 1;
+                margin-bottom: 12px;
+            }
+
+            .mobile-hero.gold { color: var(--accent-gold); }
+            .mobile-hero.green { color: var(--success); }
+
+            .mobile-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 7px 0;
+                border-top: 1px solid var(--border-subtle);
+            }
+
+            .mobile-row-label {
+                font-size: 13px;
+                color: var(--text-secondary);
+            }
+
+            .mobile-row-value {
+                font-size: 14px;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .mobile-row-value.gold { color: var(--accent-gold); }
+            .mobile-row-value.green { color: var(--success); }
+            .mobile-row-value.muted { color: var(--text-secondary); }
+
+            /* Big Sale */
+            .mobile-big-sale-amount {
+                font-family: 'Playfair Display', serif;
+                font-size: 26px;
+                font-weight: 600;
+                color: var(--accent-gold);
+                margin-bottom: 8px;
+            }
+
+            /* Search */
+            .mobile-search {
+                width: 100%;
+                padding: 12px 16px;
+                background: var(--bg-card);
+                border: 1px solid var(--border-subtle);
+                border-radius: 10px;
+                color: var(--text-primary);
+                font-family: 'Outfit', sans-serif;
+                font-size: 14px;
+                margin-bottom: 12px;
+                outline: none;
+                -webkit-appearance: none;
+            }
+
+            .mobile-search:focus { border-color: var(--accent-gold); }
+            .mobile-search::placeholder { color: var(--text-muted); }
+
+            /* Gallery List Items */
+            .mobile-gallery-item {
+                background: var(--bg-card);
+                border: 1px solid var(--border-subtle);
+                border-radius: 12px;
+                margin-bottom: 8px;
+                overflow: hidden;
+                transition: border-color 0.2s;
+            }
+
+            .mobile-gallery-item.expanded { border-color: var(--border-gold); }
+
+            .mobile-gallery-head {
+                display: flex;
+                align-items: center;
+                padding: 14px 16px;
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+                gap: 12px;
+            }
+
+            .mobile-gallery-info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .mobile-gallery-name {
+                font-size: 15px;
+                font-weight: 600;
+                color: var(--text-primary);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .mobile-gallery-sub {
+                font-size: 11px;
+                color: var(--text-muted);
+                margin-top: 1px;
+            }
+
+            .mobile-gallery-amount {
+                font-family: 'Playfair Display', serif;
+                font-size: 17px;
+                font-weight: 700;
+                color: var(--accent-gold);
+                flex-shrink: 0;
+            }
+
+            .mobile-gallery-chevron {
+                color: var(--text-muted);
+                font-size: 16px;
+                transition: transform 0.25s ease;
+                flex-shrink: 0;
+            }
+
+            .mobile-gallery-item.expanded .mobile-gallery-chevron {
+                transform: rotate(180deg);
+            }
+
+            .mobile-gallery-body {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+            }
+
+            .mobile-gallery-item.expanded .mobile-gallery-body {
+                max-height: 600px;
+            }
+
+            .mobile-gallery-body-inner {
+                padding: 0 16px 16px;
+            }
+
+            .mobile-detail-section {
+                padding: 12px;
+                background: var(--bg-elevated);
+                border-radius: 8px;
+                margin-bottom: 8px;
+            }
+
+            .mobile-detail-section:last-child { margin-bottom: 0; }
+
+            .mobile-detail-title {
+                font-size: 11px;
+                color: var(--accent-gold);
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+
+            .mobile-detail-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .mobile-detail-item {
+                display: flex;
+                flex-direction: column;
+                gap: 1px;
+            }
+
+            .mobile-detail-label {
+                font-size: 10px;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+            }
+
+            .mobile-detail-value {
+                font-size: 15px;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .mobile-detail-value.gold { color: var(--accent-gold); }
+            .mobile-detail-value.muted { color: var(--text-secondary); }
+
+            /* Mobile Target */
+            .mobile-target {
+                margin-top: 8px;
+                padding-top: 8px;
+                border-top: 1px solid var(--border-subtle);
+            }
+
+            .mobile-target-head {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 6px;
+            }
+
+            .mobile-target-label {
+                font-size: 11px;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                font-weight: 600;
+            }
+
+            .mobile-target-pct {
+                font-size: 15px;
+                font-weight: 700;
+            }
+
+            .mobile-target-bar {
+                height: 4px;
+                background: var(--bg-card);
+                border-radius: 2px;
+                overflow: hidden;
+            }
+
+            .mobile-target-fill {
+                height: 100%;
+                border-radius: 2px;
+            }
+
+            .mobile-target-fill.under { background: linear-gradient(90deg, var(--danger), #f87171); }
+            .mobile-target-fill.close { background: linear-gradient(90deg, var(--warning), #fcd34d); }
+            .mobile-target-fill.on-target { background: linear-gradient(90deg, var(--success), #4ade80); }
+            .mobile-target-fill.over { background: linear-gradient(90deg, #22d3ee, #06b6d4); }
+
+            .mobile-target-pct.under { color: var(--danger); }
+            .mobile-target-pct.close { color: var(--warning); }
+            .mobile-target-pct.on-target { color: var(--success); }
+            .mobile-target-pct.over { color: #22d3ee; }
+
+            /* Zero Days Mobile */
+            .mobile-zero {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 12px;
+                background: var(--bg-elevated);
+                border-radius: 8px;
+                margin-top: 8px;
+            }
+
+            .mobile-zero-label { font-size: 12px; color: var(--text-muted); }
+            .mobile-zero-val { font-size: 14px; font-weight: 700; }
+            .mobile-zero-val.ok { color: var(--success); }
+            .mobile-zero-val.bad { color: var(--danger); }
+
+            /* Rankings */
+            .mobile-rank-tabs {
+                display: flex;
+                background: var(--bg-card);
+                border-radius: 10px;
+                padding: 3px;
+                margin-bottom: 12px;
+            }
+
+            .mobile-rank-tab {
+                flex: 1;
+                padding: 10px 6px;
+                background: none;
+                border: none;
+                color: var(--text-muted);
+                font-family: 'Outfit', sans-serif;
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                cursor: pointer;
+                border-radius: 8px;
+                transition: all 0.2s;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .mobile-rank-tab.active {
+                background: var(--bg-elevated);
+                color: var(--accent-gold);
+            }
+
+            .mobile-rank-list { display: none; }
+            .mobile-rank-list.active { display: block; }
+
+            .mobile-rank-item {
+                display: flex;
+                align-items: center;
+                padding: 12px 14px;
+                background: var(--bg-card);
+                border: 1px solid var(--border-subtle);
+                border-radius: 10px;
+                margin-bottom: 6px;
+                gap: 12px;
+            }
+
+            .mobile-rank-pos {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 13px;
+                font-weight: 700;
+                flex-shrink: 0;
+            }
+
+            .mobile-rank-pos.gold {
+                background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
+                color: var(--bg-deep);
+            }
+            .mobile-rank-pos.silver {
+                background: linear-gradient(135deg, #9ca3af, #d1d5db);
+                color: var(--bg-deep);
+            }
+            .mobile-rank-pos.bronze {
+                background: linear-gradient(135deg, #b45309, #d97706);
+                color: var(--bg-deep);
+            }
+            .mobile-rank-pos.normal {
+                background: var(--bg-elevated);
+                color: var(--text-muted);
+            }
+
+            .mobile-rank-info { flex: 1; min-width: 0; }
+
+            .mobile-rank-name {
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--text-primary);
+            }
+
+            .mobile-rank-sub {
+                font-size: 11px;
+                color: var(--text-muted);
+            }
+
+            .mobile-rank-val {
+                font-size: 16px;
+                font-weight: 700;
+                flex-shrink: 0;
+            }
+
+            .mobile-rank-val.under { color: var(--danger); }
+            .mobile-rank-val.close { color: var(--warning); }
+            .mobile-rank-val.on-target { color: var(--success); }
+            .mobile-rank-val.over { color: #22d3ee; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <header class="header">
+        <div class="header-title">
+            <h1>Gallery Performance</h1>
+            <span>Executive Overview</span>
+        </div>
+        <div class="header-totals">
+            <div class="header-total-item">
+                <span class="header-total-label">Monthly Total</span>
+                <span class="header-total-value gold" id="monthlyMoney">-</span>
+            </div>
+            <div class="header-total-sep"></div>
+            <div class="header-total-item">
+                <span class="header-total-label">Masters Art</span>
+                <span class="header-total-value" id="monthlyHalcyon">-</span>
+            </div>
+            <div class="header-total-sep"></div>
+            <div class="header-total-item">
+                <span class="header-total-label">Castle Art</span>
+                <span class="header-total-value" id="monthlyWG">-</span>
+            </div>
+            <div class="header-total-sep wide"></div>
+            <div class="header-total-item">
+                <span class="header-total-label">Business</span>
+                <span class="header-total-value business" id="monthlyBusiness">-</span>
+            </div>
+        </div>
+        <div class="header-meta">
+            <div class="date-display">
+                <div class="date" id="currentDate">Loading...</div>
+                <div class="time" id="currentTime"></div>
+            </div>
+            <div class="header-status">
+                <span class="header-status-label">Data up to:</span>
+                <span class="header-status-value" id="lastUpdated">-</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <!-- Grand Total Sidebar -->
+        <aside class="grand-total-sidebar">
+            <div class="total-card">
+                <div class="sidebar-stacked">
+                    <span class="sidebar-stacked-label">Year to Date Money</span>
+                    <span class="sidebar-stacked-value gold" id="ytdMoney">-</span>
+                </div>
+                <div class="sidebar-stacked">
+                    <span class="sidebar-stacked-label">YTD Masters Art</span>
+                    <span class="sidebar-stacked-value" id="ytdHalcyon">-</span>
+                </div>
+                <div class="sidebar-stacked">
+                    <span class="sidebar-stacked-label">YTD Castle Art</span>
+                    <span class="sidebar-stacked-value" id="ytdWG">-</span>
+                </div>
+                <div class="sidebar-stacked">
+                    <span class="sidebar-stacked-label">YTD Business</span>
+                    <span class="sidebar-stacked-value muted" id="ytdBusiness">-</span>
+                </div>
+            </div>
+
+            <div class="total-card">
+                <div class="stat-row">
+                    <span class="stat-label">Yesterday Money</span>
+                    <span class="stat-value gold" id="yesterdayMoney">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Yesterday Masters Art</span>
+                    <span class="stat-value" id="yesterdayHalcyon">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Yesterday Castle Art</span>
+                    <span class="stat-value gold" id="yesterdayWG">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Yesterday Business</span>
+                    <span class="stat-value" id="yesterdayBusiness">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Active Galleries</span>
+                    <span class="stat-value green" id="galleryCount">-</span>
+                </div>
+            </div>
+
+            <div class="total-card" id="bigSaleCard" style="margin-top: auto;">
+                <div class="total-label">Last Sale Over £20k</div>
+                <div class="big-sale-amount" id="bigSaleAmount">-</div>
+                <div class="stat-row">
+                    <span class="stat-label">Sold By</span>
+                    <span class="stat-value" id="bigSaleSoldBy">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Gallery</span>
+                    <span class="stat-value" id="bigSaleGallery">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Date</span>
+                    <span class="stat-value" id="bigSaleDate">-</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Gallery Carousel -->
+        <main class="gallery-section">
+            <div class="section-header">
+                <h2 class="section-title">Gallery Breakdown</h2>
+                <div class="page-indicator" id="pageIndicator"></div>
+            </div>
+            <div class="gallery-carousel" id="galleryCarousel"></div>
+        </main>
+
+        <!-- League Table Sidebar -->
+        <aside class="league-sidebar">
+            <div class="league-section">
+                <div class="league-header">
+                    <div class="league-title">Total</div>
+                </div>
+                <div class="league-container">
+                    <div class="league-list" id="leagueTotal"></div>
+                </div>
+            </div>
+            <div class="league-section">
+                <div class="league-header">
+                    <div class="league-title">Castle Art</div>
+                </div>
+                <div class="league-container">
+                    <div class="league-list" id="leagueWG"></div>
+                </div>
+            </div>
+            <div class="league-section">
+                <div class="league-header">
+                    <div class="league-title">Masters Art</div>
+                </div>
+                <div class="league-container">
+                    <div class="league-list" id="leagueHalcyon"></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Mobile Layout -->
+    <div class="mobile-layout" id="mobileLayout">
+        <div class="mobile-content">
+            <!-- Overview Tab -->
+            <div class="mobile-tab active" id="mob-tab-overview">
+                <div id="mobOverview"></div>
+            </div>
+
+            <!-- Galleries Tab -->
+            <div class="mobile-tab" id="mob-tab-galleries">
+                <input type="text" class="mobile-search" id="mobSearch" placeholder="Search galleries...">
+                <div id="mobGalleryList"></div>
+            </div>
+
+            <!-- Rankings Tab -->
+            <div class="mobile-tab" id="mob-tab-rankings">
+                <div class="mobile-rank-tabs">
+                    <button class="mobile-rank-tab active" data-rank="total">Total</button>
+                    <button class="mobile-rank-tab" data-rank="castle">Castle Art</button>
+                    <button class="mobile-rank-tab" data-rank="masters">Masters Art</button>
+                </div>
+                <div class="mobile-rank-list active" id="mobRankTotal"></div>
+                <div class="mobile-rank-list" id="mobRankCastle"></div>
+                <div class="mobile-rank-list" id="mobRankMasters"></div>
+            </div>
+        </div>
+
+        <nav class="mobile-nav">
+            <button class="mobile-nav-btn active" data-tab="overview">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="10" rx="1"/><rect x="3" y="15" width="7" height="6" rx="1"/><rect x="14" y="3" width="7" height="6" rx="1"/><rect x="14" y="11" width="7" height="10" rx="1"/></svg>
+                Overview
+            </button>
+            <button class="mobile-nav-btn" data-tab="galleries">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round"/></svg>
+                Galleries
+            </button>
+            <button class="mobile-nav-btn" data-tab="rankings">
+                <svg viewBox="0 0 24 24"><path d="M8 21V11M12 21V3M16 21v-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Rankings
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        const GALLERY_CODES = [77,75,116,58,51,133,118,115,84,93,121,106,124,86,109,90,70,82,94,81,120,72,76,57,78,73,128,65,91,92,129,63,123,102,71,61];
+        const ITEMS_PER_PAGE = 4;
+        const PAGE_DURATION = 8000; // 8 seconds per page
+        const REFRESH_INTERVAL = 86400000; // 24 hours - data only changes once per day
+
+
+        let galleries = [];
+        let currentPage = 0;
+        let totalPages = 0;
+        let pageTimer = null;
+        let progressTimer = null;
+        let leagueScrollTimer = null;
+        let leagueScrollDirection = 1;
+        let leagueScrollPosition = 0;
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-GB', {
+                style: 'currency',
+                currency: 'GBP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value || 0);
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-GB', dateOptions);
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-GB', timeOptions);
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch('data.json');
+                const data = await response.json();
+
+                if (data.success) {
+                    renderDashboard(data);
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                }
+
+                if (data.snapshotDate) {
+                    const snapDate = new Date(data.snapshotDate);
+                    const snapYesterday = new Date(snapDate);
+                    snapYesterday.setDate(snapYesterday.getDate() - 1);
+                    document.getElementById('lastUpdated').textContent = snapYesterday.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function renderDashboard(data) {
+            const { grandTotals } = data;
+            galleries = data.galleries;
+
+            // Update grand totals
+            document.getElementById('monthlyMoney').textContent = formatCurrency(grandTotals.monthlyMoney);
+            document.getElementById('monthlyHalcyon').textContent = formatCurrency(grandTotals.monthlyHalcyon);
+            document.getElementById('monthlyWG').textContent = formatCurrency(grandTotals.monthlyWG);
+            document.getElementById('monthlyBusiness').textContent = formatCurrency(grandTotals.monthlyBusiness);
+            document.getElementById('ytdMoney').textContent = formatCurrency(grandTotals.ytdMoney);
+            document.getElementById('ytdHalcyon').textContent = formatCurrency(grandTotals.ytdHalcyon);
+            document.getElementById('ytdWG').textContent = formatCurrency(grandTotals.ytdWG);
+            document.getElementById('ytdBusiness').textContent = formatCurrency(grandTotals.ytdBusiness);
+            document.getElementById('yesterdayMoney').textContent = formatCurrency(grandTotals.yesterdayMoney);
+            document.getElementById('yesterdayHalcyon').textContent = formatCurrency(grandTotals.yesterdayHalcyon);
+            document.getElementById('yesterdayWG').textContent = formatCurrency(grandTotals.yesterdayWG);
+            document.getElementById('yesterdayBusiness').textContent = formatCurrency(grandTotals.yesterdayBusiness);
+            document.getElementById('galleryCount').textContent = galleries.length;
+
+            // Update last big sale
+            if (data.lastBigSale) {
+                document.getElementById('bigSaleAmount').textContent = formatCurrency(data.lastBigSale.SOTotal);
+                document.getElementById('bigSaleSoldBy').textContent = data.lastBigSale.SalespersonName || 'Unknown';
+                document.getElementById('bigSaleGallery').textContent = data.lastBigSale.GalleryName || 'Unknown';
+                document.getElementById('bigSaleDate').textContent = new Date(data.lastBigSale.SODate).toLocaleDateString('en-GB');
+            } else {
+                document.getElementById('bigSaleAmount').textContent = 'None found';
+                document.getElementById('bigSaleAmount').style.fontSize = '18px';
+                document.getElementById('bigSaleSoldBy').textContent = '-';
+                document.getElementById('bigSaleGallery').textContent = '-';
+                document.getElementById('bigSaleDate').textContent = '-';
+            }
+
+            // Sort galleries alphabetically by name
+            galleries.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+            // Calculate pages
+            totalPages = Math.ceil(galleries.length / ITEMS_PER_PAGE);
+
+            // Render page indicators
+            renderPageIndicators();
+
+            // Render first page
+            renderPages();
+
+            // Start carousel
+            startCarousel();
+
+            // Render league table
+            renderLeagueTable();
+
+            // Render mobile version
+            renderMobile(data);
+        }
+
+        let leagueScrollers = [];
+
+        function renderLeagueTable() {
+            const getTargetClass = (percent) => {
+                if (percent >= 110) return 'over';
+                if (percent >= 90) return 'on-target';
+                if (percent >= 70) return 'close';
+                return 'under';
+            };
+
+            function buildLeagueList(listEl, getValue) {
+                listEl.innerHTML = '';
+                const ranked = galleries
+                    .filter(g => g.businessTarget > 0)
+                    .map(g => ({ ...g, percent: Math.round((getValue(g) / g.businessTarget) * 100) }))
+                    .sort((a, b) => b.percent - a.percent);
+
+                ranked.forEach((gallery, index) => {
+                    const rank = index + 1;
+                    let rankClass = 'normal';
+                    if (rank === 1) rankClass = 'gold';
+                    else if (rank === 2) rankClass = 'silver';
+                    else if (rank === 3) rankClass = 'bronze';
+
+                    const item = document.createElement('div');
+                    item.className = 'league-item';
+                    item.innerHTML = `
+                        <div class="league-rank ${rankClass}">${rank}</div>
+                        <div class="league-info">
+                            <div class="league-name">${gallery.name}</div>
+                            <div class="league-target-value">${formatCurrency(getValue(gallery))} / ${formatCurrency(gallery.businessTarget)}</div>
+                        </div>
+                        <div class="league-percent ${getTargetClass(gallery.percent)}">${gallery.percent}%</div>
+                    `;
+                    listEl.appendChild(item);
+                });
+            }
+
+            function buildHalcyonList() {
+                const listEl = document.getElementById('leagueHalcyon');
+                listEl.innerHTML = '';
+                const ranked = galleries
+                    .filter(g => (g.monthlyHalcyon || 0) > 0)
+                    .sort((a, b) => (b.monthlyHalcyon || 0) - (a.monthlyHalcyon || 0));
+
+                ranked.forEach((gallery, index) => {
+                    const rank = index + 1;
+                    let rankClass = 'normal';
+                    if (rank === 1) rankClass = 'gold';
+                    else if (rank === 2) rankClass = 'silver';
+                    else if (rank === 3) rankClass = 'bronze';
+
+                    const item = document.createElement('div');
+                    item.className = 'league-item';
+                    item.innerHTML = `
+                        <div class="league-rank ${rankClass}">${rank}</div>
+                        <div class="league-info">
+                            <div class="league-name">${gallery.name}</div>
+                        </div>
+                        <div class="league-percent" style="color: var(--accent-gold);">${formatCurrency(gallery.monthlyHalcyon)}</div>
+                    `;
+                    listEl.appendChild(item);
+                });
+            }
+
+            buildLeagueList(document.getElementById('leagueTotal'), g => g.monthlyBusiness);
+            buildLeagueList(document.getElementById('leagueWG'), g => g.monthlyWG);
+            buildHalcyonList();
+
+            startLeagueScrollAll();
+        }
+
+        function startLeagueScrollAll() {
+            leagueScrollers.forEach(t => clearInterval(t));
+            leagueScrollers = [];
+
+            document.querySelectorAll('.league-section').forEach(section => {
+                const container = section.querySelector('.league-container');
+                const list = section.querySelector('.league-list');
+                let pos = 0;
+                let dir = 1;
+
+                const timer = setInterval(() => {
+                    const maxScroll = list.scrollHeight - container.clientHeight;
+                    if (maxScroll <= 0) return;
+
+                    pos += dir * 1;
+                    if (pos >= maxScroll) { pos = maxScroll; dir = -1; }
+                    else if (pos <= 0) { pos = 0; dir = 1; }
+
+                    list.style.transform = `translateY(-${pos}px)`;
+                }, 50);
+
+                leagueScrollers.push(timer);
+            });
+        }
+
+        function renderPageIndicators() {
+            const container = document.getElementById('pageIndicator');
+            container.innerHTML = '';
+
+            for (let i = 0; i < totalPages; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'page-dot' + (i === 0 ? ' active' : '');
+                dot.dataset.page = i;
+                container.appendChild(dot);
+            }
+        }
+
+        function renderPages() {
+            const carousel = document.getElementById('galleryCarousel');
+            carousel.innerHTML = '';
+
+            for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+                const page = document.createElement('div');
+                page.className = 'gallery-page' + (pageIndex === 0 ? ' active' : '');
+                page.dataset.page = pageIndex;
+
+                const startIdx = pageIndex * ITEMS_PER_PAGE;
+                const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, galleries.length);
+                const pageGalleries = galleries.slice(startIdx, endIdx);
+
+                pageGalleries.forEach(gallery => {
+                    const card = document.createElement('div');
+                    card.className = 'gallery-card';
+
+                    // Determine target status class
+                    const getTargetClass = (percent) => {
+                        if (percent === null) return '';
+                        if (percent >= 110) return 'over';
+                        if (percent >= 90) return 'on-target';
+                        if (percent >= 70) return 'close';
+                        return 'under';
+                    };
+
+                    const businessTargetClass = getTargetClass(gallery.businessVsTarget);
+                    const businessTargetWidth = gallery.businessVsTarget !== null ? Math.min(gallery.businessVsTarget, 150) : 0;
+
+                    const zeroDaysHtml = `
+                        <div class="zero-days-row">
+                            <span class="zero-days-label">£0 Days This Month</span>
+                            <span class="zero-days-value ${gallery.zeroDays > 0 ? 'has-zeros' : 'no-zeros'}">${gallery.zeroDays}</span>
+                        </div>
+                    `;
+
+                    const targetHtml = gallery.businessVsTarget !== null ? `
+                        <div class="target-bar">
+                            <div class="target-label">vs Target (Business)</div>
+                            <div class="target-progress">
+                                <div class="target-progress-fill ${businessTargetClass}" style="width: ${businessTargetWidth}%"></div>
+                            </div>
+                            <div class="target-percent ${businessTargetClass}">${gallery.businessVsTarget}%</div>
+                            <div class="target-amount">Target: ${formatCurrency(gallery.businessTarget)}</div>
+                        </div>
+                    ` : '';
+
+                    card.innerHTML = `
+                        <div class="gallery-header">
+                            <div class="gallery-name">${gallery.name || 'Unknown Gallery'}</div>
+                            <div class="gallery-code">${gallery.code}</div>
+                        </div>
+                        <div class="gallery-metrics">
+                            <div class="metric-columns">
+                                <div class="metric-group">
+                                    <div class="metric-group-label">Yesterday</div>
+                                    <div class="metric-hero yesterday">${formatCurrency(gallery.yesterdayMoney)}</div>
+                                    <div class="metric-breakdown-item">
+                                        <span class="metric-breakdown-label">Masters Art</span>
+                                        <span class="metric-breakdown-value">${formatCurrency(gallery.yesterdayHalcyon)}</span>
+                                    </div>
+                                    <div class="metric-breakdown-item">
+                                        <span class="metric-breakdown-label">Castle Art</span>
+                                        <span class="metric-breakdown-value highlight">${formatCurrency(gallery.yesterdayWG)}</span>
+                                    </div>
+                                    <div class="metric-breakdown-item">
+                                        <span class="metric-breakdown-label">Business</span>
+                                        <span class="metric-breakdown-value business">${formatCurrency(gallery.yesterdayBusiness)}</span>
+                                    </div>
+                                </div>
+                                <div class="metric-group">
+                                    <div class="metric-group-label">Month to Date</div>
+                                    <div class="metric-hero monthly">${formatCurrency(gallery.monthlyMoney)}</div>
+                                    <div class="metric-breakdown-item">
+                                        <span class="metric-breakdown-label">Masters Art</span>
+                                        <span class="metric-breakdown-value">${formatCurrency(gallery.monthlyHalcyon)}</span>
+                                    </div>
+                                    <div class="metric-breakdown-item">
+                                        <span class="metric-breakdown-label">Castle Art</span>
+                                        <span class="metric-breakdown-value highlight">${formatCurrency(gallery.monthlyWG)}</span>
+                                    </div>
+                                    <div class="metric-breakdown-item">
+                                        <span class="metric-breakdown-label">Business</span>
+                                        <span class="metric-breakdown-value business">${formatCurrency(gallery.monthlyBusiness)}</span>
+                                    </div>
+                                </div>
+                                <div class="metric-group">
+                                    <div class="metric-group-label">Year to Date</div>
+                                    <div class="metric-hero monthly">${formatCurrency(gallery.ytdMoney)}</div>
+                                    <div class="metric-breakdown-item">
+                                        <span class="metric-breakdown-label">Masters Art</span>
+                                        <span class="metric-breakdown-value">${formatCurrency(gallery.ytdHalcyon)}</span>
+                                    </div>
+                                    <div class="metric-breakdown-item">
+                                        <span class="metric-breakdown-label">Castle Art</span>
+                                        <span class="metric-breakdown-value highlight">${formatCurrency(gallery.ytdWG)}</span>
+                                    </div>
+                                    <div class="metric-breakdown-item">
+                                        <span class="metric-breakdown-label">Business</span>
+                                        <span class="metric-breakdown-value business">${formatCurrency(gallery.ytdBusiness)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ${zeroDaysHtml}
+                            ${targetHtml}
+                        </div>
+                    `;
+
+                    page.appendChild(card);
+                });
+
+                carousel.appendChild(page);
+            }
+        }
+
+        function startCarousel() {
+            if (pageTimer) clearInterval(pageTimer);
+            if (progressTimer) clearInterval(progressTimer);
+
+            let progress = 0;
+            const progressEl = document.getElementById('progressFill');
+
+            // Progress bar animation
+            progressTimer = setInterval(() => {
+                progress += (100 / (PAGE_DURATION / 100));
+                if (progress > 100) progress = 0;
+                progressEl.style.width = progress + '%';
+            }, 100);
+
+            // Page transition
+            pageTimer = setInterval(() => {
+                goToPage((currentPage + 1) % totalPages);
+            }, PAGE_DURATION);
+        }
+
+        function goToPage(pageIndex) {
+            const pages = document.querySelectorAll('.gallery-page');
+            const dots = document.querySelectorAll('.page-dot');
+
+            // Update current page
+            pages.forEach((page, i) => {
+                if (i === currentPage) {
+                    page.classList.remove('active');
+                    page.classList.add('exit');
+                } else if (i === pageIndex) {
+                    page.classList.remove('exit');
+                    page.classList.add('active');
+                } else {
+                    page.classList.remove('active', 'exit');
+                }
+            });
+
+            // Update dots
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === pageIndex);
+            });
+
+            currentPage = pageIndex;
+
+            // Reset progress
+            document.getElementById('progressFill').style.width = '0%';
+
+        }
+
+        // ========== MOBILE FUNCTIONS ==========
+
+        function renderMobile(data) {
+            const { grandTotals } = data;
+
+            // Overview tab
+            const overviewEl = document.getElementById('mobOverview');
+            overviewEl.innerHTML = `
+                <div class="mobile-card gold-top">
+                    <div class="mobile-card-title">Monthly Total</div>
+                    <div class="mobile-hero gold">${formatCurrency(grandTotals.monthlyMoney)}</div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Masters Art</span>
+                        <span class="mobile-row-value">${formatCurrency(grandTotals.monthlyHalcyon)}</span>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Castle Art</span>
+                        <span class="mobile-row-value">${formatCurrency(grandTotals.monthlyWG)}</span>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Business</span>
+                        <span class="mobile-row-value muted">${formatCurrency(grandTotals.monthlyBusiness)}</span>
+                    </div>
+                </div>
+
+                <div class="mobile-card gold-top">
+                    <div class="mobile-card-title">Year to Date</div>
+                    <div class="mobile-hero green">${formatCurrency(grandTotals.ytdMoney)}</div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Masters Art</span>
+                        <span class="mobile-row-value">${formatCurrency(grandTotals.ytdHalcyon)}</span>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Castle Art</span>
+                        <span class="mobile-row-value">${formatCurrency(grandTotals.ytdWG)}</span>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Business</span>
+                        <span class="mobile-row-value muted">${formatCurrency(grandTotals.ytdBusiness)}</span>
+                    </div>
+                </div>
+
+                <div class="mobile-card">
+                    <div class="mobile-card-title">Yesterday</div>
+                    <div class="mobile-hero gold">${formatCurrency(grandTotals.yesterdayMoney)}</div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Masters Art</span>
+                        <span class="mobile-row-value">${formatCurrency(grandTotals.yesterdayHalcyon)}</span>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Castle Art</span>
+                        <span class="mobile-row-value">${formatCurrency(grandTotals.yesterdayWG)}</span>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Business</span>
+                        <span class="mobile-row-value muted">${formatCurrency(grandTotals.yesterdayBusiness)}</span>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Active Galleries</span>
+                        <span class="mobile-row-value green">${galleries.length}</span>
+                    </div>
+                </div>
+
+                ${data.lastBigSale ? `
+                <div class="mobile-card gold-top">
+                    <div class="mobile-card-title">Last Sale Over &pound;20k</div>
+                    <div class="mobile-big-sale-amount">${formatCurrency(data.lastBigSale.SOTotal)}</div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Sold By</span>
+                        <span class="mobile-row-value">${data.lastBigSale.SalespersonName || 'Unknown'}</span>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Gallery</span>
+                        <span class="mobile-row-value">${data.lastBigSale.GalleryName || 'Unknown'}</span>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-row-label">Date</span>
+                        <span class="mobile-row-value">${new Date(data.lastBigSale.SODate).toLocaleDateString('en-GB')}</span>
+                    </div>
+                </div>` : ''}
+            `;
+
+            // Galleries tab
+            renderMobileGalleries();
+
+            // Rankings tab
+            renderMobileRankings();
+        }
+
+        function renderMobileGalleries(filter) {
+            const listEl = document.getElementById('mobGalleryList');
+            const filtered = filter
+                ? galleries.filter(g => (g.name || '').toLowerCase().includes(filter.toLowerCase()))
+                : galleries;
+
+            listEl.innerHTML = filtered.map(g => {
+                const getTargetClass = (pct) => {
+                    if (pct === null) return '';
+                    if (pct >= 110) return 'over';
+                    if (pct >= 90) return 'on-target';
+                    if (pct >= 70) return 'close';
+                    return 'under';
+                };
+                const tClass = getTargetClass(g.businessVsTarget);
+                const tWidth = g.businessVsTarget !== null ? Math.min(g.businessVsTarget, 150) : 0;
+
+                return `
+                <div class="mobile-gallery-item" data-code="${g.code}">
+                    <div class="mobile-gallery-head" onclick="toggleMobileGallery(this)">
+                        <div class="mobile-gallery-info">
+                            <div class="mobile-gallery-name">${g.name || 'Unknown'}</div>
+                            <div class="mobile-gallery-sub">Code ${g.code} &middot; MTD ${formatCurrency(g.monthlyBusiness)} biz</div>
+                        </div>
+                        <div class="mobile-gallery-amount">${formatCurrency(g.monthlyMoney)}</div>
+                        <div class="mobile-gallery-chevron">&#9660;</div>
+                    </div>
+                    <div class="mobile-gallery-body">
+                        <div class="mobile-gallery-body-inner">
+                            <div class="mobile-detail-section">
+                                <div class="mobile-detail-title">Yesterday</div>
+                                <div class="mobile-detail-grid">
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Total</span>
+                                        <span class="mobile-detail-value gold">${formatCurrency(g.yesterdayMoney)}</span>
+                                    </div>
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Business</span>
+                                        <span class="mobile-detail-value muted">${formatCurrency(g.yesterdayBusiness)}</span>
+                                    </div>
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Masters Art</span>
+                                        <span class="mobile-detail-value">${formatCurrency(g.yesterdayHalcyon)}</span>
+                                    </div>
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Castle Art</span>
+                                        <span class="mobile-detail-value">${formatCurrency(g.yesterdayWG)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mobile-detail-section">
+                                <div class="mobile-detail-title">Month to Date</div>
+                                <div class="mobile-detail-grid">
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Total</span>
+                                        <span class="mobile-detail-value gold">${formatCurrency(g.monthlyMoney)}</span>
+                                    </div>
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Business</span>
+                                        <span class="mobile-detail-value muted">${formatCurrency(g.monthlyBusiness)}</span>
+                                    </div>
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Masters Art</span>
+                                        <span class="mobile-detail-value">${formatCurrency(g.monthlyHalcyon)}</span>
+                                    </div>
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Castle Art</span>
+                                        <span class="mobile-detail-value">${formatCurrency(g.monthlyWG)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mobile-detail-section">
+                                <div class="mobile-detail-title">Year to Date</div>
+                                <div class="mobile-detail-grid">
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Total</span>
+                                        <span class="mobile-detail-value gold">${formatCurrency(g.ytdMoney)}</span>
+                                    </div>
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Business</span>
+                                        <span class="mobile-detail-value muted">${formatCurrency(g.ytdBusiness)}</span>
+                                    </div>
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Masters Art</span>
+                                        <span class="mobile-detail-value">${formatCurrency(g.ytdHalcyon)}</span>
+                                    </div>
+                                    <div class="mobile-detail-item">
+                                        <span class="mobile-detail-label">Castle Art</span>
+                                        <span class="mobile-detail-value">${formatCurrency(g.ytdWG)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ${g.businessVsTarget !== null ? `
+                            <div class="mobile-target">
+                                <div class="mobile-target-head">
+                                    <span class="mobile-target-label">vs Target (Biz)</span>
+                                    <span class="mobile-target-pct ${tClass}">${g.businessVsTarget}%</span>
+                                </div>
+                                <div class="mobile-target-bar">
+                                    <div class="mobile-target-fill ${tClass}" style="width:${tWidth}%"></div>
+                                </div>
+                            </div>` : ''}
+                            <div class="mobile-zero">
+                                <span class="mobile-zero-label">&pound;0 Days This Month</span>
+                                <span class="mobile-zero-val ${g.zeroDays > 0 ? 'bad' : 'ok'}">${g.zeroDays}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function toggleMobileGallery(el) {
+            const item = el.closest('.mobile-gallery-item');
+            item.classList.toggle('expanded');
+        }
+
+        function renderMobileRankings() {
+            const getTargetClass = (pct) => {
+                if (pct >= 110) return 'over';
+                if (pct >= 90) return 'on-target';
+                if (pct >= 70) return 'close';
+                return 'under';
+            };
+
+            function buildRankList(containerId, getValue, showPercent) {
+                const el = document.getElementById(containerId);
+                let ranked;
+                if (showPercent) {
+                    ranked = galleries
+                        .filter(g => g.businessTarget > 0)
+                        .map(g => ({ ...g, percent: Math.round((getValue(g) / g.businessTarget) * 100) }))
+                        .sort((a, b) => b.percent - a.percent);
+                } else {
+                    ranked = galleries
+                        .filter(g => (getValue(g) || 0) > 0)
+                        .sort((a, b) => (getValue(b) || 0) - (getValue(a) || 0));
+                }
+
+                el.innerHTML = ranked.map((g, i) => {
+                    const rank = i + 1;
+                    let rc = 'normal';
+                    if (rank === 1) rc = 'gold';
+                    else if (rank === 2) rc = 'silver';
+                    else if (rank === 3) rc = 'bronze';
+
+                    const valClass = showPercent ? getTargetClass(g.percent) : '';
+                    const valText = showPercent ? g.percent + '%' : formatCurrency(getValue(g));
+                    const subText = showPercent
+                        ? `${formatCurrency(getValue(g))} / ${formatCurrency(g.businessTarget)}`
+                        : '';
+
+                    return `
+                    <div class="mobile-rank-item">
+                        <div class="mobile-rank-pos ${rc}">${rank}</div>
+                        <div class="mobile-rank-info">
+                            <div class="mobile-rank-name">${g.name}</div>
+                            ${subText ? `<div class="mobile-rank-sub">${subText}</div>` : ''}
+                        </div>
+                        <div class="mobile-rank-val ${valClass}">${valText}</div>
+                    </div>`;
+                }).join('');
+            }
+
+            buildRankList('mobRankTotal', g => g.monthlyBusiness, true);
+            buildRankList('mobRankCastle', g => g.monthlyWG, true);
+            buildRankList('mobRankMasters', g => g.monthlyHalcyon, false);
+        }
+
+        // Mobile tab navigation
+        document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.mobile-tab').forEach(t => t.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('mob-tab-' + tab).classList.add('active');
+                // Scroll to top when switching tabs
+                document.querySelector('.mobile-content').scrollTop = 0;
+            });
+        });
+
+        // Mobile ranking sub-tabs
+        document.querySelectorAll('.mobile-rank-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.mobile-rank-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.mobile-rank-list').forEach(l => l.classList.remove('active'));
+                tab.classList.add('active');
+                const target = tab.dataset.rank;
+                const map = { total: 'mobRankTotal', castle: 'mobRankCastle', masters: 'mobRankMasters' };
+                document.getElementById(map[target]).classList.add('active');
+            });
+        });
+
+        // Mobile gallery search
+        document.getElementById('mobSearch').addEventListener('input', (e) => {
+            renderMobileGalleries(e.target.value);
+        });
+
+        // Initialize
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+        loadDashboard();
+
+        // Auto-refresh data
+        setInterval(loadDashboard, REFRESH_INTERVAL);
+    </script>
+</body>
+</html>
