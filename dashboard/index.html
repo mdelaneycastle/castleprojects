@@ -1575,6 +1575,13 @@
                 </div>
             </div>
 
+            <div class="total-card">
+                <div class="stat-row">
+                    <span class="stat-label">Last Month's Money</span>
+                    <span class="stat-value gold" id="lastMonthMoney">-</span>
+                </div>
+            </div>
+
             <div class="total-card" id="bigSaleCard" style="margin-top: auto;">
                 <div class="total-label">Last Sale Over £20k</div>
                 <div class="big-sale-amount" id="bigSaleAmount">-</div>
@@ -1832,6 +1839,7 @@
             document.getElementById('yesterdayWG').textContent = formatCurrency(grandTotals.yesterdayWG);
             document.getElementById('yesterdayBusiness').textContent = formatCurrency(grandTotals.yesterdayBusiness);
             document.getElementById('galleryCount').textContent = galleries.length;
+            document.getElementById('lastMonthMoney').textContent = formatCurrency(grandTotals.lastMonthMoney);
 
             // Update last big sale
             if (data.lastBigSale) {
