@@ -1143,10 +1143,6 @@
 
                 <div id="frameBlock" style="display:none;">
                     <div class="calc-divider"></div>
-                    <div id="depthInfo" class="glass-info" style="display:none; margin-bottom: 1rem;">
-                        <div class="info-row"><span>Required rebate depth:</span><span id="requiredDepth">0 mm</span></div>
-                        <div class="info-row" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;"><span>(mount + glass + 2mm backboard)</span><span></span></div>
-                    </div>
                     <div class="calc-group full-width">
                         <label class="calc-label"><span id="frameStepNum">5</span>. Frame</label>
                         <select id="frameSelectCalc" class="calc-select">
@@ -1172,10 +1168,10 @@
             </div>
 
             <div class="calc-panel">
-                <h2 class="calc-title">Quote Breakdown</h2>
-                <p class="calc-subtitle">Live calculation as you build the quote</p>
-                <div id="breakdownContent">
-                    <p style="color: var(--text-secondary); font-style: italic;">Select options to see the breakdown…</p>
+                <h2 class="calc-title">Frame Preview</h2>
+                <p class="calc-subtitle">Image of the selected frame</p>
+                <div id="framePreview">
+                    <p style="color: var(--text-secondary); font-style: italic;">Select a frame to see a preview…</p>
                 </div>
             </div>
 
@@ -2048,12 +2044,12 @@
                 .filter(([, data]) => data.rebate >= minDepth)
                 .sort(([a], [b]) => a.localeCompare(b));
             select.innerHTML = '<option value="">Select a frame...</option>';
-            frames.forEach(([code, data]) => {
+            frames.forEach(([code]) => {
                 const meta = framesData.find(f => f.code === code);
                 const title = meta ? meta.title : code;
                 const opt = document.createElement('option');
                 opt.value = code;
-                opt.textContent = `${code} — ${title} (£${data.price.toFixed(2)}/m, ${data.rebate}mm rebate)`;
+                opt.textContent = `${code} — ${title}`;
                 select.appendChild(opt);
             });
             if (current && framePricing[current] && framePricing[current].rebate >= minDepth) {
@@ -2087,28 +2083,20 @@
             const frameCost = perimeterM * frame.price;
 
             result.items.push({
-                label: `Frame ${s.frameCode} (${perimeterM.toFixed(2)}m × £${frame.price.toFixed(2)}/m)`,
+                label: `Frame ${s.frameCode}`,
                 amount: frameCost
             });
 
-            if (s.mountType === 'mounted') {
-                const underThreshold = perimeterM < DAY_RATE_THRESHOLD_M;
-                const dayRate = underThreshold ? DAY_RATE_LOW : DAY_RATE_HIGH;
-                result.items.push({
-                    label: `Day rate (${perimeterM.toFixed(2)}m ${underThreshold ? '<' : '≥'} 5.00m)`,
-                    amount: dayRate
-                });
+            const underThreshold = perimeterM < DAY_RATE_THRESHOLD_M;
+            const dayRate = underThreshold ? DAY_RATE_LOW : DAY_RATE_HIGH;
+            result.items.push({ label: 'Day rate', amount: dayRate });
+
+            if (s.mountType === 'mounted' || s.includeGlass) {
                 const glassCost = perimeterM * GLASS_RATE_PER_M;
-                result.items.push({
-                    label: `Glass — ${GLASS_LABELS[s.glass] || s.glass} (${perimeterM.toFixed(2)}m × £${GLASS_RATE_PER_M.toFixed(2)})`,
-                    amount: glassCost
-                });
-            } else if (s.includeGlass) {
-                const glassCost = perimeterM * GLASS_RATE_PER_M;
-                result.items.push({
-                    label: `Glass (${perimeterM.toFixed(2)}m × £${GLASS_RATE_PER_M.toFixed(2)})`,
-                    amount: glassCost
-                });
+                const label = s.mountType === 'mounted'
+                    ? `Glass — ${GLASS_LABELS[s.glass] || s.glass}`
+                    : 'Glass';
+                result.items.push({ label, amount: glassCost });
             }
 
             result.total = result.items.reduce((sum, it) => sum + it.amount, 0);
@@ -2169,12 +2157,6 @@
             const frameBlock = document.getElementById('frameBlock');
             frameBlock.style.display = showFrame ? 'block' : 'none';
             if (showFrame) {
-                if (s.mountType === 'mounted') {
-                    document.getElementById('depthInfo').style.display = 'block';
-                    document.getElementById('requiredDepth').textContent = `${getRequiredDepth()} mm`;
-                } else {
-                    document.getElementById('depthInfo').style.display = 'none';
-                }
                 document.getElementById('frameStepNum').textContent = s.artist === 'OTHER'
                     ? (s.mountType === 'mounted' ? 5 : 4)
                     : (s.mountType === 'mounted' ? 6 : 5);
@@ -2187,21 +2169,31 @@
                 ? (s.mountType === 'mounted' ? 6 : 5)
                 : (s.mountType === 'mounted' ? 7 : 6);
 
+            renderFramePreview();
+
             const result = computeQuote();
-            const breakdown = document.getElementById('breakdownContent');
-            if (!result.valid) {
-                breakdown.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">Select options to see the breakdown…</p>';
-                document.getElementById('grandTotal').textContent = '£0.00';
+            document.getElementById('grandTotal').textContent = result.valid ? `£${result.total.toFixed(2)}` : '£0.00';
+        }
+
+        function renderFramePreview() {
+            const preview = document.getElementById('framePreview');
+            const code = quoteState.frameCode;
+            if (!code) {
+                preview.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">Select a frame to see a preview…</p>';
                 return;
             }
-
-            let html = `<div class="total-row" style="padding-top: 0;"><span>Quote type</span><span style="color: var(--accent-gold);">${result.label}</span></div>`;
-            result.items.forEach(item => {
-                html += `<div class="total-row"><span style="font-size: 0.9rem;">${item.label}</span><span>£${item.amount.toFixed(2)}</span></div>`;
-            });
-            html += `<div class="calc-divider"></div><div class="total-row grand-total"><span>Subtotal</span><span>£${result.total.toFixed(2)}</span></div>`;
-            breakdown.innerHTML = html;
-            document.getElementById('grandTotal').textContent = `£${result.total.toFixed(2)}`;
+            const meta = framesData.find(f => f.code === code);
+            const imageUrl = meta && meta.image ? meta.image : `${code}_4.jpg`;
+            const title = meta ? meta.title : code;
+            preview.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 1rem 0;">
+                    <img src="${imageUrl}" alt="${title}" style="max-width: 100%; max-height: 320px; object-fit: contain; filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));" onerror="this.style.display='none'">
+                    <div style="text-align: center;">
+                        <div style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--text-primary);">${title}</div>
+                        <div style="color: var(--accent-gold); font-size: 0.85rem; letter-spacing: 0.1em; margin-top: 0.25rem;">${code}</div>
+                    </div>
+                </div>
+            `;
         }
 
         document.getElementById('artistSelect').addEventListener('change', (e) => {
