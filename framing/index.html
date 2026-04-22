@@ -1073,9 +1073,9 @@
                 <p class="calc-subtitle">Step through the options to build a quote</p>
 
                 <div class="calc-group full-width">
-                    <label class="calc-label">1. Artist</label>
+                    <label class="calc-label">1. Standard Artist Frame Costs</label>
                     <select id="artistSelect" class="calc-select">
-                        <option value="">Select an artist...</option>
+                        <option value="">Select...</option>
                         <option value="BDY">BDY</option>
                         <option value="BOX">BOX</option>
                         <option value="BCN">BCN</option>
@@ -1126,10 +1126,9 @@
                             <label class="calc-label"><span id="glassStepNum">4</span>. Glass</label>
                             <select id="glassSelect" class="calc-select">
                                 <option value="">Select glass...</option>
-                                <option value="standard">Standard Glass</option>
-                                <option value="uv70">UV AR/70 Glass</option>
-                                <option value="museum">UV AR/99 Museum Glass</option>
-                                <option value="acrylic">Museum Acrylic</option>
+                                <option value="2">Standard glass/Perspex — 2mm (up to 5m²)</option>
+                                <option value="3">Standard glass/Perspex — 3mm (over 5m²)</option>
+                                <option value="4">Specialised glass (UV/Museum) — 4mm</option>
                             </select>
                         </div>
                     </div>
@@ -1146,7 +1145,7 @@
                     <div class="calc-divider"></div>
                     <div id="depthInfo" class="glass-info" style="display:none; margin-bottom: 1rem;">
                         <div class="info-row"><span>Required rebate depth:</span><span id="requiredDepth">0 mm</span></div>
-                        <div class="info-row" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;"><span>(mount + 2mm glass + 2mm backboard)</span><span></span></div>
+                        <div class="info-row" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;"><span>(mount + glass + 2mm backboard)</span><span></span></div>
                     </div>
                     <div class="calc-group full-width">
                         <label class="calc-label"><span id="frameStepNum">5</span>. Frame</label>
@@ -1281,12 +1280,11 @@
             JMQ: { price: 300, label: 'JMQ Standard Framing (with mount)' }
         };
 
-        const GLASS_RATE_PER_M2 = 32.89;
+        const GLASS_RATE_PER_M = 32.89;
         const DAY_RATE_LOW = 130;
         const DAY_RATE_HIGH = 260;
-        const DAY_RATE_AREA_THRESHOLD_M2 = 5;
+        const DAY_RATE_THRESHOLD_M = 5;
         const BACKBOARD_THICKNESS_MM = 2;
-        const GLASS_THICKNESS_MM = 2;
 
         const framesData = [
             {
@@ -2025,10 +2023,9 @@
         };
 
         const GLASS_LABELS = {
-            standard: 'Standard Glass',
-            uv70: 'UV AR/70 Glass',
-            museum: 'UV AR/99 Museum Glass',
-            acrylic: 'Museum Acrylic'
+            '2': 'Standard glass/Perspex 2mm',
+            '3': 'Standard glass/Perspex 3mm',
+            '4': 'Specialised glass (UV/Museum) 4mm'
         };
 
         const MOUNT_LABELS = {
@@ -2039,7 +2036,8 @@
 
         function getRequiredDepth() {
             if (quoteState.mountType !== 'mounted') return 0;
-            return (quoteState.mount || 0) + GLASS_THICKNESS_MM + BACKBOARD_THICKNESS_MM;
+            const glassMm = parseFloat(quoteState.glass) || 0;
+            return (quoteState.mount || 0) + glassMm + BACKBOARD_THICKNESS_MM;
         }
 
         function populateFrameSelect() {
@@ -2086,7 +2084,6 @@
 
             const frame = framePricing[s.frameCode];
             const perimeterM = (s.height * 2 + s.width * 2) / 100;
-            const areaM2 = (s.height * s.width) / 10000;
             const frameCost = perimeterM * frame.price;
 
             result.items.push({
@@ -2095,21 +2092,21 @@
             });
 
             if (s.mountType === 'mounted') {
-                const underThreshold = areaM2 < DAY_RATE_AREA_THRESHOLD_M2;
+                const underThreshold = perimeterM < DAY_RATE_THRESHOLD_M;
                 const dayRate = underThreshold ? DAY_RATE_LOW : DAY_RATE_HIGH;
                 result.items.push({
-                    label: `Day rate (${areaM2.toFixed(2)}m² ${underThreshold ? '<' : '≥'} 5m²)`,
+                    label: `Day rate (${perimeterM.toFixed(2)}m ${underThreshold ? '<' : '≥'} 5.00m)`,
                     amount: dayRate
                 });
-                const glassCost = areaM2 * GLASS_RATE_PER_M2;
+                const glassCost = perimeterM * GLASS_RATE_PER_M;
                 result.items.push({
-                    label: `Glass — ${GLASS_LABELS[s.glass] || s.glass} (${areaM2.toFixed(2)}m² × £${GLASS_RATE_PER_M2.toFixed(2)}/m²)`,
+                    label: `Glass — ${GLASS_LABELS[s.glass] || s.glass} (${perimeterM.toFixed(2)}m × £${GLASS_RATE_PER_M.toFixed(2)})`,
                     amount: glassCost
                 });
             } else if (s.includeGlass) {
-                const glassCost = areaM2 * GLASS_RATE_PER_M2;
+                const glassCost = perimeterM * GLASS_RATE_PER_M;
                 result.items.push({
-                    label: `Glass (${areaM2.toFixed(2)}m² × £${GLASS_RATE_PER_M2.toFixed(2)}/m²)`,
+                    label: `Glass (${perimeterM.toFixed(2)}m × £${GLASS_RATE_PER_M.toFixed(2)})`,
                     amount: glassCost
                 });
             }
