@@ -1069,105 +1069,124 @@
     <section class="calculator-section" id="calculatorSection" style="display: none;">
         <div class="calculator-container">
             <div class="calc-panel">
-                <h2 class="calc-title">Frame Price Calculator</h2>
+                <h2 class="calc-title">Framing Quote Builder</h2>
+                <p class="calc-subtitle">Step through the options to build a quote</p>
 
-                <div class="calc-row">
-                    <div class="calc-group">
-                        <label class="calc-label">Frame Code</label>
-                        <select id="frameSelect" class="calc-select">
-                            <option value="">Select a frame...</option>
+                <div class="calc-group full-width">
+                    <label class="calc-label">1. Artist</label>
+                    <select id="artistSelect" class="calc-select">
+                        <option value="">Select an artist...</option>
+                        <option value="BDY">BDY</option>
+                        <option value="BOX">BOX</option>
+                        <option value="BCN">BCN</option>
+                        <option value="STL">STL</option>
+                        <option value="JMQ">JMQ</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+
+                <div id="standardBlock" style="display:none;">
+                    <div class="calc-divider"></div>
+                    <label class="calc-label">2. Standard Framing Option</label>
+                    <div class="glass-info">
+                        <div class="info-row"><span id="standardLabel">-</span><span id="standardPriceDisplay">-</span></div>
+                    </div>
+                    <div class="toggle-group" style="margin-top: 0.75rem;">
+                        <button class="toggle-btn" data-quotepath="standard">Use Standard</button>
+                        <button class="toggle-btn" data-quotepath="custom">Custom Options</button>
+                    </div>
+                </div>
+
+                <div id="mountTypeBlock" style="display:none;">
+                    <div class="calc-divider"></div>
+                    <label class="calc-label"><span id="mountStepNum">2</span>. Framing Type</label>
+                    <div class="toggle-group">
+                        <button class="toggle-btn" data-mounttype="unmounted">Unmounted</button>
+                        <button class="toggle-btn" data-mounttype="mounted">Mounted</button>
+                    </div>
+                </div>
+
+                <div id="mountSelectBlock" style="display:none;">
+                    <div class="calc-divider"></div>
+                    <div class="calc-group full-width">
+                        <label class="calc-label"><span id="mountSelectStepNum">3</span>. Mount</label>
+                        <select id="mountSelect" class="calc-select">
+                            <option value="">Select mount...</option>
+                            <option value="15">Standard Float Mount — 15mm (like BCN)</option>
+                            <option value="14">Float with Surround Mount — 14mm (like Mondo)</option>
+                            <option value="6">Window Mount — 6mm (like BDY Beaten Path)</option>
                         </select>
                     </div>
-                    <div class="calc-group band-display">
-                        <label class="calc-label">Price Band</label>
-                        <div class="band-value" id="bandDisplay">-</div>
-                    </div>
                 </div>
 
-                <div class="calc-row">
-                    <div class="calc-group">
-                        <label class="calc-label">Length (cm)</label>
-                        <input type="number" id="lengthInput" class="calc-input" placeholder="e.g. 65" min="1" step="0.1">
+                <div id="glassBlock" style="display:none;">
+                    <div class="calc-divider"></div>
+                    <div id="glassMountedBlock" style="display:none;">
+                        <div class="calc-group full-width">
+                            <label class="calc-label"><span id="glassStepNum">4</span>. Glass</label>
+                            <select id="glassSelect" class="calc-select">
+                                <option value="">Select glass...</option>
+                                <option value="standard">Standard Glass</option>
+                                <option value="uv70">UV AR/70 Glass</option>
+                                <option value="museum">UV AR/99 Museum Glass</option>
+                                <option value="acrylic">Museum Acrylic</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="calc-group">
-                        <label class="calc-label">Width (cm)</label>
-                        <input type="number" id="widthInput" class="calc-input" placeholder="e.g. 70" min="1" step="0.1">
-                    </div>
-                </div>
-
-                <div class="calc-row">
-                    <div class="calc-group">
-                        <label class="calc-label">Include Glass/Perspex?</label>
+                    <div id="glassUnmountedBlock" style="display:none;">
+                        <label class="calc-label"><span id="glassUStepNum">4</span>. Glass</label>
                         <div class="toggle-group">
-                            <button class="toggle-btn active" data-glass="no">No Glass</button>
-                            <button class="toggle-btn" data-glass="yes">With Glass (+£50)</button>
+                            <button class="toggle-btn active" data-unglass="no">No Glass</button>
+                            <button class="toggle-btn" data-unglass="yes">With Glass</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="calc-divider"></div>
-
-                <div class="calc-result">
-                    <div class="result-label">Frame Price</div>
-                    <div class="result-value" id="framePrice">£0.00</div>
-                </div>
-            </div>
-
-            <div class="calc-panel">
-                <h2 class="calc-title">Glazing Upgrade Calculator</h2>
-                <p class="calc-subtitle">Calculate additional cost for premium glazing options</p>
-
-                <div class="calc-row">
-                    <div class="calc-group">
-                        <label class="calc-label">Height (cm)</label>
-                        <input type="number" id="glassHeight" class="calc-input" placeholder="e.g. 86.5" min="1" step="0.1">
+                <div id="frameBlock" style="display:none;">
+                    <div class="calc-divider"></div>
+                    <div id="depthInfo" class="glass-info" style="display:none; margin-bottom: 1rem;">
+                        <div class="info-row"><span>Required rebate depth:</span><span id="requiredDepth">0 mm</span></div>
+                        <div class="info-row" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;"><span>(mount + 2mm glass + 2mm backboard)</span><span></span></div>
                     </div>
-                    <div class="calc-group">
-                        <label class="calc-label">Width (cm)</label>
-                        <input type="number" id="glassWidth" class="calc-input" placeholder="e.g. 64.5" min="1" step="0.1">
-                    </div>
-                </div>
-
-                <div class="calc-row">
                     <div class="calc-group full-width">
-                        <label class="calc-label">Glass Type</label>
-                        <select id="glassType" class="calc-select">
-                            <option value="0">Standard Glass (included)</option>
-                            <option value="0.02">UV AR/70 - £0.02/cm² (98% UV protection)</option>
-                            <option value="0.028">UV AR/99 Museum Glass - £0.028/cm² (best quality)</option>
-                            <option value="0.05">Museum Acrylic - £0.05/cm² (for overseas shipping)</option>
+                        <label class="calc-label"><span id="frameStepNum">5</span>. Frame</label>
+                        <select id="frameSelectCalc" class="calc-select">
+                            <option value="">Select a frame...</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="glass-info">
-                    <div class="info-row"><span>Area:</span> <span id="glassArea">0 cm²</span></div>
+                <div id="dimensionsBlock" style="display:none;">
+                    <div class="calc-divider"></div>
+                    <label class="calc-label"><span id="dimStepNum">6</span>. Image Dimensions</label>
+                    <div class="calc-row">
+                        <div class="calc-group">
+                            <label class="calc-label">Height (cm)</label>
+                            <input type="number" id="heightInput" class="calc-input" placeholder="e.g. 65" min="1" step="0.1">
+                        </div>
+                        <div class="calc-group">
+                            <label class="calc-label">Width (cm)</label>
+                            <input type="number" id="widthInput" class="calc-input" placeholder="e.g. 70" min="1" step="0.1">
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="calc-divider"></div>
-
-                <div class="calc-result">
-                    <div class="result-label">Glazing Upgrade Cost</div>
-                    <div class="result-value" id="glassPrice">£0.00</div>
+            <div class="calc-panel">
+                <h2 class="calc-title">Quote Breakdown</h2>
+                <p class="calc-subtitle">Live calculation as you build the quote</p>
+                <div id="breakdownContent">
+                    <p style="color: var(--text-secondary); font-style: italic;">Select options to see the breakdown…</p>
                 </div>
             </div>
 
             <div class="calc-panel total-panel">
-                <div class="total-row">
-                    <span>Frame Price:</span>
-                    <span id="totalFrame">£0.00</span>
-                </div>
-                <div class="total-row">
-                    <span>Glazing Upgrade:</span>
-                    <span id="totalGlass">£0.00</span>
-                </div>
-                <div class="calc-divider"></div>
                 <div class="total-row grand-total">
                     <span>Total Quote:</span>
                     <span id="grandTotal">£0.00</span>
                 </div>
                 <div class="btn-row">
-                    <button class="reset-btn" id="resetCalc">Reset Calculator</button>
+                    <button class="reset-btn" id="resetCalc">Reset</button>
                     <button class="export-btn" id="exportPdf">Export Quote PDF</button>
                 </div>
             </div>
@@ -1220,26 +1239,54 @@
     </footer>
 
     <script>
-        // Price band mapping from spreadsheet
-        const priceBands = {
-            // Band A
-            "617348000": "A", "431434": "A", "350790": "A", "350792": "A",
-            "266412626": "A", "266412727": "A", "265411727": "A", "337167000": "A",
-            "432167246": "A", "432167348": "A", "441227000": "A", "440227000": "A",
-            "532167000": "A", "734146000": "A", "734148000": "A", "216167000": "A",
-            "219000178": "A", "241000107": "A", "241000167": "A", "277501653": "A",
-            "277501673": "A", "277501753": "A", "277501773": "A", "342703001": "A",
-            "411167003": "A", "411167007": "A", "415220167": "A", "431167000": "A",
-            "432167000": "A", "L3135": "A",
-            // Band B
-            "756287000": "B", "739287000": "B", "791287000": "B", "549650": "B",
-            "536560": "B", "283502653": "B", "283502673": "B", "283502753": "B",
-            "283502773": "B", "513287000": "B", "737075000": "B", "737077000": "B",
-            "737079000": "B", "L2789": "B", "L2716": "B", "L2947": "B", "L2948": "B",
-            // Band C
-            "407000127": "C", "407000167": "C", "513167000": "C", "508167000": "C",
-            "601167000": "C", "639167000": "C", "517167000": "C", "L3072": "C"
+        // Per-meter frame price + rebate depth (mm) from frame document
+        const framePricing = {
+            "350790":    { price: 6.28, rebate: 27 },
+            "431434":    { price: 7.71, rebate: 25 },
+            "266412626": { price: 6.50, rebate: 13 },
+            "266412727": { price: 6.50, rebate: 13 },
+            "283502673": { price: 6.38, rebate: 9 },
+            "283502753": { price: 6.83, rebate: 9 },
+            "283502773": { price: 6.83, rebate: 9 },
+            "337167000": { price: 4.38, rebate: 30 },
+            "407000127": { price: 8.53, rebate: 48 },
+            "407000167": { price: 8.53, rebate: 48 },
+            "432167246": { price: 6.21, rebate: 17 },
+            "432167348": { price: 6.21, rebate: 17 },
+            "441227000": { price: 4.26, rebate: 28 },
+            "513167000": { price: 6.61, rebate: 41 },
+            "513287000": { price: 6.82, rebate: 41 },
+            "532167000": { price: 3.35, rebate: 21 },
+            "549650":    { price: 6.92, rebate: 15 },
+            "601167000": { price: 8.69, rebate: 24 },
+            "617348000": { price: 3.71, rebate: 25 },
+            "734146000": { price: 4.13, rebate: 13 },
+            "737077000": { price: 6.67, rebate: 18 },
+            "756287000": { price: 6.53, rebate: 11 },
+            "L2789":     { price: 6.00, rebate: 48 },
+            "L2716":     { price: 7.50, rebate: 13 },
+            "L1403":     { price: 5.40, rebate: 28 },
+            "411167007": { price: 3.77, rebate: 12 },
+            "411167003": { price: 3.77, rebate: 12 },
+            "219000178": { price: 1.11, rebate: 8 },
+            "342703001": { price: 2.95, rebate: 10 }
         };
+
+        // Standard framing quotes per artist code
+        const standardQuotes = {
+            BDY: { price: 250, label: 'BDY Standard Framing (with mount)' },
+            BOX: { price: 300, label: 'BOX Standard Framing' },
+            BCN: { price: 250, label: 'BCN Standard Framing (with mount)' },
+            STL: { price: 250, label: 'STL Standard Framing (with mount)' },
+            JMQ: { price: 300, label: 'JMQ Standard Framing (with mount)' }
+        };
+
+        const GLASS_RATE_PER_M2 = 32.89;
+        const DAY_RATE_LOW = 130;
+        const DAY_RATE_HIGH = 260;
+        const DAY_RATE_AREA_THRESHOLD_M2 = 5;
+        const BACKBOARD_THICKNESS_MM = 2;
+        const GLASS_THICKNESS_MM = 2;
 
         const framesData = [
             {
@@ -1964,161 +2011,318 @@
             });
         });
 
-        // Calculator functionality
-        const frameSelect = document.getElementById('frameSelect');
-        const bandDisplay = document.getElementById('bandDisplay');
-        const lengthInput = document.getElementById('lengthInput');
-        const widthInput = document.getElementById('widthInput');
-        const framePrice = document.getElementById('framePrice');
-        const glassHeight = document.getElementById('glassHeight');
-        const glassWidth = document.getElementById('glassWidth');
-        const glassType = document.getElementById('glassType');
-        const glassArea = document.getElementById('glassArea');
-        const glassPrice = document.getElementById('glassPrice');
-        const totalFrame = document.getElementById('totalFrame');
-        const totalGlass = document.getElementById('totalGlass');
-        const grandTotal = document.getElementById('grandTotal');
+        // Framing quote calculator
+        const quoteState = {
+            artist: '',
+            path: '',          // '' | 'standard' | 'custom'
+            mountType: '',     // '' | 'mounted' | 'unmounted'
+            mount: 0,          // mm
+            glass: '',         // glass type key
+            includeGlass: false, // unmounted toggle
+            frameCode: '',
+            height: 0,
+            width: 0
+        };
 
-        let includeGlass = false;
+        const GLASS_LABELS = {
+            standard: 'Standard Glass',
+            uv70: 'UV AR/70 Glass',
+            museum: 'UV AR/99 Museum Glass',
+            acrylic: 'Museum Acrylic'
+        };
 
-        // Populate frame select dropdown (exclude backup-only frames)
-        framesData.filter(f => !f.backupOnly).forEach(frame => {
-            const band = priceBands[frame.code] || '?';
-            const option = document.createElement('option');
-            option.value = frame.code;
-            option.textContent = `${frame.code} - ${frame.title} (Band ${band})`;
-            frameSelect.appendChild(option);
-        });
+        const MOUNT_LABELS = {
+            15: 'Standard Float Mount',
+            14: 'Float with Surround Mount',
+            6: 'Window Mount'
+        };
 
-        // Glass toggle buttons
-        document.querySelectorAll('.toggle-btn[data-glass]').forEach(btn => {
-            if (!btn || !btn.dataset) return;
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.toggle-btn[data-glass]').forEach(b => {
-                    if (b) b.classList.remove('active');
-                });
-                btn.classList.add('active');
-                includeGlass = btn.dataset.glass === 'yes';
-                calculateFramePrice();
+        function getRequiredDepth() {
+            if (quoteState.mountType !== 'mounted') return 0;
+            return (quoteState.mount || 0) + GLASS_THICKNESS_MM + BACKBOARD_THICKNESS_MM;
+        }
+
+        function populateFrameSelect() {
+            const select = document.getElementById('frameSelectCalc');
+            const current = quoteState.frameCode;
+            const minDepth = getRequiredDepth();
+            const frames = Object.entries(framePricing)
+                .filter(([, data]) => data.rebate >= minDepth)
+                .sort(([a], [b]) => a.localeCompare(b));
+            select.innerHTML = '<option value="">Select a frame...</option>';
+            frames.forEach(([code, data]) => {
+                const meta = framesData.find(f => f.code === code);
+                const title = meta ? meta.title : code;
+                const opt = document.createElement('option');
+                opt.value = code;
+                opt.textContent = `${code} — ${title} (£${data.price.toFixed(2)}/m, ${data.rebate}mm rebate)`;
+                select.appendChild(opt);
             });
-        });
+            if (current && framePricing[current] && framePricing[current].rebate >= minDepth) {
+                select.value = current;
+            } else {
+                quoteState.frameCode = '';
+            }
+        }
 
-        // Frame selection change
-        frameSelect.addEventListener('change', () => {
-            const code = frameSelect.value;
-            const band = priceBands[code] || '-';
-            bandDisplay.textContent = band;
-            calculateFramePrice();
-        });
+        function computeQuote() {
+            const s = quoteState;
+            const result = { items: [], total: 0, valid: false, label: '' };
 
-        // Dimension inputs
-        lengthInput.addEventListener('input', calculateFramePrice);
-        widthInput.addEventListener('input', calculateFramePrice);
+            if (s.path === 'standard' && s.artist && standardQuotes[s.artist]) {
+                const sq = standardQuotes[s.artist];
+                result.items.push({ label: sq.label, amount: sq.price });
+                result.total = sq.price;
+                result.valid = true;
+                result.label = 'Standard';
+                return result;
+            }
 
-        // Glass inputs
-        glassHeight.addEventListener('input', calculateGlassPrice);
-        glassWidth.addEventListener('input', calculateGlassPrice);
-        glassType.addEventListener('change', calculateGlassPrice);
+            if (s.path !== 'custom') return result;
+            if (!s.mountType) return result;
+            if (!s.frameCode || !framePricing[s.frameCode]) return result;
+            if (!s.height || !s.width) return result;
+            if (s.mountType === 'mounted' && (!s.mount || !s.glass)) return result;
 
-        function calculateFramePrice() {
-            const code = frameSelect.value;
-            const band = priceBands[code];
-            const length = parseFloat(lengthInput.value) || 0;
-            const width = parseFloat(widthInput.value) || 0;
+            const frame = framePricing[s.frameCode];
+            const perimeterM = (s.height * 2 + s.width * 2) / 100;
+            const areaM2 = (s.height * s.width) / 10000;
+            const frameCost = perimeterM * frame.price;
 
-            if (!band || length <= 0 || width <= 0) {
-                framePrice.textContent = '£0.00';
-                totalFrame.textContent = '£0.00';
-                updateGrandTotal();
+            result.items.push({
+                label: `Frame ${s.frameCode} (${perimeterM.toFixed(2)}m × £${frame.price.toFixed(2)}/m)`,
+                amount: frameCost
+            });
+
+            if (s.mountType === 'mounted') {
+                const underThreshold = areaM2 < DAY_RATE_AREA_THRESHOLD_M2;
+                const dayRate = underThreshold ? DAY_RATE_LOW : DAY_RATE_HIGH;
+                result.items.push({
+                    label: `Day rate (${areaM2.toFixed(2)}m² ${underThreshold ? '<' : '≥'} 5m²)`,
+                    amount: dayRate
+                });
+                const glassCost = areaM2 * GLASS_RATE_PER_M2;
+                result.items.push({
+                    label: `Glass — ${GLASS_LABELS[s.glass] || s.glass} (${areaM2.toFixed(2)}m² × £${GLASS_RATE_PER_M2.toFixed(2)}/m²)`,
+                    amount: glassCost
+                });
+            } else if (s.includeGlass) {
+                const glassCost = areaM2 * GLASS_RATE_PER_M2;
+                result.items.push({
+                    label: `Glass (${areaM2.toFixed(2)}m² × £${GLASS_RATE_PER_M2.toFixed(2)}/m²)`,
+                    amount: glassCost
+                });
+            }
+
+            result.total = result.items.reduce((sum, it) => sum + it.amount, 0);
+            result.valid = true;
+            result.label = s.mountType === 'mounted' ? 'Mounted' : 'Unmounted';
+            return result;
+        }
+
+        function renderCalculator() {
+            const s = quoteState;
+
+            const standardBlock = document.getElementById('standardBlock');
+            const hasStandard = s.artist && s.artist !== 'OTHER' && standardQuotes[s.artist];
+            if (hasStandard) {
+                standardBlock.style.display = 'block';
+                const sq = standardQuotes[s.artist];
+                document.getElementById('standardLabel').textContent = sq.label;
+                document.getElementById('standardPriceDisplay').textContent = `£${sq.price}`;
+                document.querySelectorAll('[data-quotepath]').forEach(b => {
+                    b.classList.toggle('active', b.dataset.quotepath === s.path);
+                });
+            } else {
+                standardBlock.style.display = 'none';
+            }
+
+            const showCustom = s.artist === 'OTHER' || s.path === 'custom';
+            const mountTypeBlock = document.getElementById('mountTypeBlock');
+            mountTypeBlock.style.display = showCustom ? 'block' : 'none';
+            document.getElementById('mountStepNum').textContent = s.artist === 'OTHER' ? 2 : 3;
+            document.querySelectorAll('[data-mounttype]').forEach(b => {
+                b.classList.toggle('active', b.dataset.mounttype === s.mountType);
+            });
+
+            const mountSelectBlock = document.getElementById('mountSelectBlock');
+            mountSelectBlock.style.display = (showCustom && s.mountType === 'mounted') ? 'block' : 'none';
+            document.getElementById('mountSelectStepNum').textContent = s.artist === 'OTHER' ? 3 : 4;
+
+            const glassBlock = document.getElementById('glassBlock');
+            const glassMountedBlock = document.getElementById('glassMountedBlock');
+            const glassUnmountedBlock = document.getElementById('glassUnmountedBlock');
+            if (showCustom && s.mountType === 'mounted' && s.mount) {
+                glassBlock.style.display = 'block';
+                glassMountedBlock.style.display = 'block';
+                glassUnmountedBlock.style.display = 'none';
+                document.getElementById('glassStepNum').textContent = s.artist === 'OTHER' ? 4 : 5;
+            } else if (showCustom && s.mountType === 'unmounted') {
+                glassBlock.style.display = 'block';
+                glassMountedBlock.style.display = 'none';
+                glassUnmountedBlock.style.display = 'block';
+                document.getElementById('glassUStepNum').textContent = s.artist === 'OTHER' ? 3 : 4;
+            } else {
+                glassBlock.style.display = 'none';
+            }
+
+            let showFrame = false;
+            if (showCustom && s.mountType === 'mounted' && s.mount && s.glass) showFrame = true;
+            if (showCustom && s.mountType === 'unmounted') showFrame = true;
+            const frameBlock = document.getElementById('frameBlock');
+            frameBlock.style.display = showFrame ? 'block' : 'none';
+            if (showFrame) {
+                if (s.mountType === 'mounted') {
+                    document.getElementById('depthInfo').style.display = 'block';
+                    document.getElementById('requiredDepth').textContent = `${getRequiredDepth()} mm`;
+                } else {
+                    document.getElementById('depthInfo').style.display = 'none';
+                }
+                document.getElementById('frameStepNum').textContent = s.artist === 'OTHER'
+                    ? (s.mountType === 'mounted' ? 5 : 4)
+                    : (s.mountType === 'mounted' ? 6 : 5);
+                populateFrameSelect();
+            }
+
+            const dimensionsBlock = document.getElementById('dimensionsBlock');
+            dimensionsBlock.style.display = (showFrame && s.frameCode) ? 'block' : 'none';
+            document.getElementById('dimStepNum').textContent = s.artist === 'OTHER'
+                ? (s.mountType === 'mounted' ? 6 : 5)
+                : (s.mountType === 'mounted' ? 7 : 6);
+
+            const result = computeQuote();
+            const breakdown = document.getElementById('breakdownContent');
+            if (!result.valid) {
+                breakdown.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">Select options to see the breakdown…</p>';
+                document.getElementById('grandTotal').textContent = '£0.00';
                 return;
             }
 
-            // Calculate perimeter in meters
-            const perimeterMeters = ((length * 2) + (width * 2)) / 100;
+            let html = `<div class="total-row" style="padding-top: 0;"><span>Quote type</span><span style="color: var(--accent-gold);">${result.label}</span></div>`;
+            result.items.forEach(item => {
+                html += `<div class="total-row"><span style="font-size: 0.9rem;">${item.label}</span><span>£${item.amount.toFixed(2)}</span></div>`;
+            });
+            html += `<div class="calc-divider"></div><div class="total-row grand-total"><span>Subtotal</span><span>£${result.total.toFixed(2)}</span></div>`;
+            breakdown.innerHTML = html;
+            document.getElementById('grandTotal').textContent = `£${result.total.toFixed(2)}`;
+        }
 
-            // Band multipliers (from spreadsheet: A=6*5=30, B=9*5=45, C=12*5=60)
-            const multipliers = { A: 30, B: 45, C: 60 };
-            const multiplier = multipliers[band] || 30;
-
-            let price = perimeterMeters * multiplier;
-
-            // Add glass surcharge if selected
-            if (includeGlass) {
-                price += 50;
+        document.getElementById('artistSelect').addEventListener('change', (e) => {
+            quoteState.artist = e.target.value;
+            if (quoteState.artist === 'OTHER') {
+                quoteState.path = 'custom';
+            } else if (standardQuotes[quoteState.artist]) {
+                quoteState.path = '';
+            } else {
+                quoteState.path = '';
             }
-
-            const priceFormatted = '£' + price.toFixed(2);
-            framePrice.textContent = priceFormatted;
-            totalFrame.textContent = priceFormatted;
-            updateGrandTotal();
-        }
-
-        function calculateGlassPrice() {
-            const height = parseFloat(glassHeight.value) || 0;
-            const width = parseFloat(glassWidth.value) || 0;
-            const ratePerCm2 = parseFloat(glassType.value) || 0;
-
-            const area = height * width;
-            glassArea.textContent = area.toFixed(0) + ' cm²';
-
-            const price = area * ratePerCm2;
-            const priceFormatted = '£' + price.toFixed(2);
-            glassPrice.textContent = priceFormatted;
-            totalGlass.textContent = priceFormatted;
-            updateGrandTotal();
-        }
-
-        function updateGrandTotal() {
-            const framePriceVal = parseFloat(framePrice.textContent.replace('£', '')) || 0;
-            const glassPriceVal = parseFloat(glassPrice.textContent.replace('£', '')) || 0;
-            const total = framePriceVal + glassPriceVal;
-            grandTotal.textContent = '£' + total.toFixed(2);
-        }
-
-        // Reset button
-        document.getElementById('resetCalc').addEventListener('click', () => {
-            frameSelect.value = '';
-            bandDisplay.textContent = '-';
-            lengthInput.value = '';
-            widthInput.value = '';
-            glassHeight.value = '';
-            glassWidth.value = '';
-            glassType.value = '0';
-            includeGlass = false;
-            document.querySelectorAll('.toggle-btn[data-glass]').forEach(b => b.classList.remove('active'));
-            document.querySelector('.toggle-btn[data-glass="no"]').classList.add('active');
-            framePrice.textContent = '£0.00';
-            glassArea.textContent = '0 cm²';
-            glassPrice.textContent = '£0.00';
-            totalFrame.textContent = '£0.00';
-            totalGlass.textContent = '£0.00';
-            grandTotal.textContent = '£0.00';
+            renderCalculator();
         });
+
+        document.querySelectorAll('[data-quotepath]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                quoteState.path = btn.dataset.quotepath;
+                if (quoteState.path === 'standard') {
+                    quoteState.mountType = '';
+                    quoteState.mount = 0;
+                    quoteState.glass = '';
+                    quoteState.includeGlass = false;
+                    quoteState.frameCode = '';
+                    quoteState.height = 0;
+                    quoteState.width = 0;
+                    document.getElementById('mountSelect').value = '';
+                    document.getElementById('glassSelect').value = '';
+                    document.getElementById('heightInput').value = '';
+                    document.getElementById('widthInput').value = '';
+                }
+                renderCalculator();
+            });
+        });
+
+        document.querySelectorAll('[data-mounttype]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                quoteState.mountType = btn.dataset.mounttype;
+                quoteState.mount = 0;
+                quoteState.glass = '';
+                quoteState.includeGlass = false;
+                quoteState.frameCode = '';
+                document.getElementById('mountSelect').value = '';
+                document.getElementById('glassSelect').value = '';
+                document.querySelectorAll('[data-unglass]').forEach(b => b.classList.remove('active'));
+                document.querySelector('[data-unglass="no"]').classList.add('active');
+                renderCalculator();
+            });
+        });
+
+        document.getElementById('mountSelect').addEventListener('change', (e) => {
+            quoteState.mount = parseFloat(e.target.value) || 0;
+            quoteState.frameCode = '';
+            renderCalculator();
+        });
+
+        document.getElementById('glassSelect').addEventListener('change', (e) => {
+            quoteState.glass = e.target.value;
+            renderCalculator();
+        });
+
+        document.querySelectorAll('[data-unglass]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-unglass]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                quoteState.includeGlass = btn.dataset.unglass === 'yes';
+                renderCalculator();
+            });
+        });
+
+        document.getElementById('frameSelectCalc').addEventListener('change', (e) => {
+            quoteState.frameCode = e.target.value;
+            renderCalculator();
+        });
+
+        document.getElementById('heightInput').addEventListener('input', (e) => {
+            quoteState.height = parseFloat(e.target.value) || 0;
+            renderCalculator();
+        });
+
+        document.getElementById('widthInput').addEventListener('input', (e) => {
+            quoteState.width = parseFloat(e.target.value) || 0;
+            renderCalculator();
+        });
+
+        document.getElementById('resetCalc').addEventListener('click', () => {
+            Object.assign(quoteState, {
+                artist: '', path: '', mountType: '', mount: 0,
+                glass: '', includeGlass: false, frameCode: '', height: 0, width: 0
+            });
+            document.getElementById('artistSelect').value = '';
+            document.getElementById('mountSelect').value = '';
+            document.getElementById('glassSelect').value = '';
+            document.getElementById('heightInput').value = '';
+            document.getElementById('widthInput').value = '';
+            document.querySelectorAll('[data-mounttype], [data-quotepath], [data-unglass]').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-unglass="no"]').classList.add('active');
+            renderCalculator();
+        });
+
+        // Initial render
+        renderCalculator();
 
         // PDF Export
         document.getElementById('exportPdf').addEventListener('click', () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            const result = computeQuote();
 
-            const code = frameSelect.value;
-            const frame = framesData.find(f => f.code === code);
-            const band = priceBands[code] || '-';
-            const length = lengthInput.value || '0';
-            const width = widthInput.value || '0';
-            const glassH = glassHeight.value || '0';
-            const glassW = glassWidth.value || '0';
-            const glassTypeText = glassType.options[glassType.selectedIndex].text;
-            const framePriceVal = framePrice.textContent;
-            const glassPriceVal = glassPrice.textContent;
-            const totalVal = grandTotal.textContent;
+            if (!result.valid) {
+                alert('Please complete the quote before exporting.');
+                return;
+            }
 
+            const s = quoteState;
             const today = new Date();
-            const dateStr = today.toLocaleDateString('en-GB', {
-                day: 'numeric', month: 'long', year: 'numeric'
-            });
+            const dateStr = today.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
             const quoteNum = 'Q' + today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0') + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
 
-            // Header - Logo image
             const logoImg = document.getElementById('pdfLogo');
             if (logoImg && logoImg.complete) {
                 try {
@@ -2130,148 +2334,95 @@
                     const imgData = canvas.toDataURL('image/png');
                     doc.addImage(imgData, 'PNG', 20, 12, 80, 16);
                 } catch(e) {
-                    // Fallback to text
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(24);
                     doc.setTextColor(30, 30, 30);
                     doc.text('CASTLE FINE ART', 20, 25);
                 }
             } else {
-                // Fallback to text if image not loaded
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(24);
                 doc.setTextColor(30, 30, 30);
                 doc.text('CASTLE FINE ART', 20, 25);
             }
 
-            // Quote info
             doc.setFontSize(10);
             doc.setTextColor(100, 100, 100);
             doc.text('FRAMING QUOTE', 20, 35);
-            doc.text(`Date: ${dateStr}`, 150, 20, { align: 'right' });
-            doc.text(`Quote #: ${quoteNum}`, 150, 26, { align: 'right' });
+            doc.text(`Date: ${dateStr}`, 190, 20, { align: 'right' });
+            doc.text(`Quote #: ${quoteNum}`, 190, 26, { align: 'right' });
 
-            // Divider
             doc.setDrawColor(200, 200, 200);
             doc.line(20, 42, 190, 42);
 
-            // Frame Details Section
             let y = 55;
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(30, 30, 30);
-            doc.text('FRAME DETAILS', 20, y);
-
-            y += 10;
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(10);
-            doc.setTextColor(80, 80, 80);
-
-            if (frame) {
-                doc.text(`Frame Code:`, 20, y);
-                doc.setTextColor(30, 30, 30);
-                doc.text(code, 70, y);
-
-                y += 7;
-                doc.setTextColor(80, 80, 80);
-                doc.text(`Frame Name:`, 20, y);
-                doc.setTextColor(30, 30, 30);
-                doc.text(frame.title, 70, y);
-
-                y += 7;
-                doc.setTextColor(80, 80, 80);
-                doc.text(`Price Band:`, 20, y);
-                doc.setTextColor(30, 30, 30);
-                doc.text(`Band ${band}`, 70, y);
-
-                y += 7;
-                doc.setTextColor(80, 80, 80);
-                doc.text(`Dimensions:`, 20, y);
-                doc.setTextColor(30, 30, 30);
-                doc.text(`${length} cm × ${width} cm`, 70, y);
-
-                y += 7;
-                doc.setTextColor(80, 80, 80);
-                doc.text(`Standard Glass:`, 20, y);
-                doc.setTextColor(30, 30, 30);
-                doc.text(includeGlass ? 'Included (+£50)' : 'Not included', 70, y);
-            } else {
-                doc.text('No frame selected', 20, y);
-            }
-
-            // Glazing Section
-            y += 20;
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(30, 30, 30);
-            doc.text('GLAZING UPGRADE', 20, y);
+            doc.text('QUOTE DETAILS', 20, y);
 
             y += 10;
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
 
-            if (parseFloat(glassH) > 0 && parseFloat(glassW) > 0) {
+            function addRow(label, value) {
                 doc.setTextColor(80, 80, 80);
-                doc.text(`Glass Size:`, 20, y);
+                doc.text(label, 20, y);
                 doc.setTextColor(30, 30, 30);
-                doc.text(`${glassH} cm × ${glassW} cm`, 70, y);
-
+                doc.text(String(value), 70, y);
                 y += 7;
-                doc.setTextColor(80, 80, 80);
-                doc.text(`Glass Type:`, 20, y);
-                doc.setTextColor(30, 30, 30);
-                const shortGlassType = glassTypeText.split(' - ')[0];
-                doc.text(shortGlassType, 70, y);
-
-                y += 7;
-                doc.setTextColor(80, 80, 80);
-                doc.text(`Area:`, 20, y);
-                doc.setTextColor(30, 30, 30);
-                doc.text(glassArea.textContent, 70, y);
-            } else {
-                doc.setTextColor(80, 80, 80);
-                doc.text('No glazing upgrade selected', 20, y);
             }
 
-            // Price Breakdown
-            y += 25;
+            if (s.artist) addRow('Artist:', s.artist);
+            addRow('Quote Type:', result.label);
+
+            if (s.path === 'custom') {
+                if (s.mountType === 'mounted') {
+                    const mountName = MOUNT_LABELS[s.mount] || 'Mount';
+                    addRow('Mount:', `${mountName} (${s.mount}mm)`);
+                    addRow('Glass:', GLASS_LABELS[s.glass] || s.glass);
+                    addRow('Backboard:', `${BACKBOARD_THICKNESS_MM}mm`);
+                } else if (s.mountType === 'unmounted') {
+                    addRow('Glass:', s.includeGlass ? 'Yes' : 'No');
+                }
+                if (s.frameCode) {
+                    const meta = framesData.find(f => f.code === s.frameCode);
+                    addRow('Frame Code:', s.frameCode);
+                    if (meta) addRow('Frame Name:', meta.title);
+                }
+                addRow('Dimensions:', `${s.height}cm × ${s.width}cm`);
+            }
+
+            y += 5;
             doc.setDrawColor(200, 200, 200);
             doc.line(20, y, 190, y);
-
-            y += 15;
+            y += 10;
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(30, 30, 30);
             doc.text('PRICE BREAKDOWN', 20, y);
 
-            y += 12;
+            y += 10;
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
+            doc.setFontSize(10);
+            result.items.forEach(item => {
+                doc.setTextColor(80, 80, 80);
+                const lines = doc.splitTextToSize(item.label, 130);
+                doc.text(lines, 20, y);
+                doc.setTextColor(30, 30, 30);
+                doc.text(`£${item.amount.toFixed(2)}`, 190, y, { align: 'right' });
+                y += 7 * lines.length;
+            });
 
-            // Frame price row
-            doc.setTextColor(80, 80, 80);
-            doc.text('Frame Price', 20, y);
-            doc.setTextColor(30, 30, 30);
-            doc.text(framePriceVal, 190, y, { align: 'right' });
-
-            y += 8;
-            doc.setTextColor(80, 80, 80);
-            doc.text('Glazing Upgrade', 20, y);
-            doc.setTextColor(30, 30, 30);
-            doc.text(glassPriceVal, 190, y, { align: 'right' });
-
-            // Total
-            y += 5;
+            y += 3;
             doc.setDrawColor(30, 30, 30);
             doc.line(130, y, 190, y);
-
             y += 10;
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
             doc.text('TOTAL', 20, y);
-            doc.text(totalVal, 190, y, { align: 'right' });
+            doc.text(`£${result.total.toFixed(2)}`, 190, y, { align: 'right' });
 
-            // Footer
             y = 270;
             doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
@@ -2280,8 +2431,7 @@
             doc.text('Prices are estimates and may vary based on final specifications.', 105, y + 5, { align: 'center' });
             doc.text('Castle Fine Art | www.castlefineart.com', 105, y + 12, { align: 'center' });
 
-            // Save the PDF
-            const filename = code ? `CFA-Quote-${code}-${quoteNum}.pdf` : `CFA-Quote-${quoteNum}.pdf`;
+            const filename = s.frameCode ? `CFA-Quote-${s.frameCode}-${quoteNum}.pdf` : `CFA-Quote-${quoteNum}.pdf`;
             doc.save(filename);
         });
 
