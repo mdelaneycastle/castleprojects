@@ -1106,15 +1106,30 @@
                     </div>
                 </div>
 
+                <div id="dimensionsBlock" style="display:none;">
+                    <div class="calc-divider"></div>
+                    <label class="calc-label"><span id="dimStepNum">3</span>. Image Dimensions</label>
+                    <div class="calc-row">
+                        <div class="calc-group">
+                            <label class="calc-label">Height (cm)</label>
+                            <input type="number" id="heightInput" class="calc-input" placeholder="e.g. 65" min="1" step="0.1">
+                        </div>
+                        <div class="calc-group">
+                            <label class="calc-label">Width (cm)</label>
+                            <input type="number" id="widthInput" class="calc-input" placeholder="e.g. 70" min="1" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
                 <div id="mountSelectBlock" style="display:none;">
                     <div class="calc-divider"></div>
                     <div class="calc-group full-width">
-                        <label class="calc-label"><span id="mountSelectStepNum">3</span>. Mount</label>
+                        <label class="calc-label"><span id="mountSelectStepNum">4</span>. Mount</label>
                         <select id="mountSelect" class="calc-select">
                             <option value="">Select mount...</option>
-                            <option value="15">Standard Float Mount — 15mm (like BCN)</option>
-                            <option value="14">Float with Surround Mount — 14mm (like Mondo)</option>
-                            <option value="6">Window Mount — 6mm (like BDY Beaten Path)</option>
+                            <option value="15">Standard Float Mount</option>
+                            <option value="14">Float with Surround Mount</option>
+                            <option value="6">Window Mount</option>
                         </select>
                     </div>
                 </div>
@@ -1123,12 +1138,11 @@
                     <div class="calc-divider"></div>
                     <div id="glassMountedBlock" style="display:none;">
                         <div class="calc-group full-width">
-                            <label class="calc-label"><span id="glassStepNum">4</span>. Glass</label>
+                            <label class="calc-label"><span id="glassStepNum">5</span>. Glass</label>
                             <select id="glassSelect" class="calc-select">
                                 <option value="">Select glass...</option>
-                                <option value="2">Standard glass/Perspex — 2mm (up to 5m²)</option>
-                                <option value="3">Standard glass/Perspex — 3mm (over 5m²)</option>
-                                <option value="4">Specialised glass (UV/Museum) — 4mm</option>
+                                <option value="standard">Standard Glass/Perspex</option>
+                                <option value="specialised">Specialised Glass (UV/Museum)</option>
                             </select>
                         </div>
                     </div>
@@ -1144,25 +1158,10 @@
                 <div id="frameBlock" style="display:none;">
                     <div class="calc-divider"></div>
                     <div class="calc-group full-width">
-                        <label class="calc-label"><span id="frameStepNum">5</span>. Frame</label>
+                        <label class="calc-label"><span id="frameStepNum">6</span>. Frame</label>
                         <select id="frameSelectCalc" class="calc-select">
                             <option value="">Select a frame...</option>
                         </select>
-                    </div>
-                </div>
-
-                <div id="dimensionsBlock" style="display:none;">
-                    <div class="calc-divider"></div>
-                    <label class="calc-label"><span id="dimStepNum">6</span>. Image Dimensions</label>
-                    <div class="calc-row">
-                        <div class="calc-group">
-                            <label class="calc-label">Height (cm)</label>
-                            <input type="number" id="heightInput" class="calc-input" placeholder="e.g. 65" min="1" step="0.1">
-                        </div>
-                        <div class="calc-group">
-                            <label class="calc-label">Width (cm)</label>
-                            <input type="number" id="widthInput" class="calc-input" placeholder="e.g. 70" min="1" step="0.1">
-                        </div>
                     </div>
                 </div>
             </div>
@@ -2019,9 +2018,8 @@
         };
 
         const GLASS_LABELS = {
-            '2': 'Standard glass/Perspex 2mm',
-            '3': 'Standard glass/Perspex 3mm',
-            '4': 'Specialised glass (UV/Museum) 4mm'
+            standard: 'Standard Glass/Perspex',
+            specialised: 'Specialised Glass (UV/Museum)'
         };
 
         const MOUNT_LABELS = {
@@ -2030,10 +2028,19 @@
             6: 'Window Mount'
         };
 
+        function getGlassThickness() {
+            const s = quoteState;
+            if (s.glass === 'specialised') return 4;
+            if (s.glass === 'standard') {
+                const areaM2 = (s.height * s.width) / 10000;
+                return areaM2 > 5 ? 3 : 2;
+            }
+            return 0;
+        }
+
         function getRequiredDepth() {
             if (quoteState.mountType !== 'mounted') return 0;
-            const glassMm = parseFloat(quoteState.glass) || 0;
-            return (quoteState.mount || 0) + glassMm + BACKBOARD_THICKNESS_MM;
+            return (quoteState.mount || 0) + getGlassThickness() + BACKBOARD_THICKNESS_MM;
         }
 
         function populateFrameSelect() {
@@ -2107,6 +2114,7 @@
 
         function renderCalculator() {
             const s = quoteState;
+            let step = 1; // step 1 is Artist, which is always shown
 
             const standardBlock = document.getElementById('standardBlock');
             const hasStandard = s.artist && s.artist !== 'OTHER' && standardQuotes[s.artist];
@@ -2118,56 +2126,70 @@
                 document.querySelectorAll('[data-quotepath]').forEach(b => {
                     b.classList.toggle('active', b.dataset.quotepath === s.path);
                 });
+                step++;
             } else {
                 standardBlock.style.display = 'none';
             }
 
             const showCustom = s.artist === 'OTHER' || s.path === 'custom';
+
             const mountTypeBlock = document.getElementById('mountTypeBlock');
             mountTypeBlock.style.display = showCustom ? 'block' : 'none';
-            document.getElementById('mountStepNum').textContent = s.artist === 'OTHER' ? 2 : 3;
             document.querySelectorAll('[data-mounttype]').forEach(b => {
                 b.classList.toggle('active', b.dataset.mounttype === s.mountType);
             });
+            if (showCustom) {
+                step++;
+                document.getElementById('mountStepNum').textContent = step - 1;
+            }
+
+            const dimensionsBlock = document.getElementById('dimensionsBlock');
+            const showDimensions = showCustom && !!s.mountType;
+            dimensionsBlock.style.display = showDimensions ? 'block' : 'none';
+            if (showDimensions) {
+                step++;
+                document.getElementById('dimStepNum').textContent = step - 1;
+            }
+
+            const hasDimensions = s.height > 0 && s.width > 0;
 
             const mountSelectBlock = document.getElementById('mountSelectBlock');
-            mountSelectBlock.style.display = (showCustom && s.mountType === 'mounted') ? 'block' : 'none';
-            document.getElementById('mountSelectStepNum').textContent = s.artist === 'OTHER' ? 3 : 4;
+            const showMountSelect = showDimensions && s.mountType === 'mounted' && hasDimensions;
+            mountSelectBlock.style.display = showMountSelect ? 'block' : 'none';
+            if (showMountSelect) {
+                step++;
+                document.getElementById('mountSelectStepNum').textContent = step - 1;
+            }
 
             const glassBlock = document.getElementById('glassBlock');
             const glassMountedBlock = document.getElementById('glassMountedBlock');
             const glassUnmountedBlock = document.getElementById('glassUnmountedBlock');
-            if (showCustom && s.mountType === 'mounted' && s.mount) {
+            const showGlassMounted = showMountSelect && !!s.mount;
+            const showGlassUnmounted = showDimensions && s.mountType === 'unmounted' && hasDimensions;
+            if (showGlassMounted) {
                 glassBlock.style.display = 'block';
                 glassMountedBlock.style.display = 'block';
                 glassUnmountedBlock.style.display = 'none';
-                document.getElementById('glassStepNum').textContent = s.artist === 'OTHER' ? 4 : 5;
-            } else if (showCustom && s.mountType === 'unmounted') {
+                step++;
+                document.getElementById('glassStepNum').textContent = step - 1;
+            } else if (showGlassUnmounted) {
                 glassBlock.style.display = 'block';
                 glassMountedBlock.style.display = 'none';
                 glassUnmountedBlock.style.display = 'block';
-                document.getElementById('glassUStepNum').textContent = s.artist === 'OTHER' ? 3 : 4;
+                step++;
+                document.getElementById('glassUStepNum').textContent = step - 1;
             } else {
                 glassBlock.style.display = 'none';
             }
 
-            let showFrame = false;
-            if (showCustom && s.mountType === 'mounted' && s.mount && s.glass) showFrame = true;
-            if (showCustom && s.mountType === 'unmounted') showFrame = true;
             const frameBlock = document.getElementById('frameBlock');
+            const showFrame = (showGlassMounted && !!s.glass) || showGlassUnmounted;
             frameBlock.style.display = showFrame ? 'block' : 'none';
             if (showFrame) {
-                document.getElementById('frameStepNum').textContent = s.artist === 'OTHER'
-                    ? (s.mountType === 'mounted' ? 5 : 4)
-                    : (s.mountType === 'mounted' ? 6 : 5);
+                step++;
+                document.getElementById('frameStepNum').textContent = step - 1;
                 populateFrameSelect();
             }
-
-            const dimensionsBlock = document.getElementById('dimensionsBlock');
-            dimensionsBlock.style.display = (showFrame && s.frameCode) ? 'block' : 'none';
-            document.getElementById('dimStepNum').textContent = s.artist === 'OTHER'
-                ? (s.mountType === 'mounted' ? 6 : 5)
-                : (s.mountType === 'mounted' ? 7 : 6);
 
             renderFramePreview();
 
@@ -2367,10 +2389,8 @@
 
             if (s.path === 'custom') {
                 if (s.mountType === 'mounted') {
-                    const mountName = MOUNT_LABELS[s.mount] || 'Mount';
-                    addRow('Mount:', `${mountName} (${s.mount}mm)`);
+                    addRow('Mount:', MOUNT_LABELS[s.mount] || 'Mount');
                     addRow('Glass:', GLASS_LABELS[s.glass] || s.glass);
-                    addRow('Backboard:', `${BACKBOARD_THICKNESS_MM}mm`);
                 } else if (s.mountType === 'unmounted') {
                     addRow('Glass:', s.includeGlass ? 'Yes' : 'No');
                 }
