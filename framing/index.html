@@ -2405,30 +2405,10 @@
             y += 5;
             doc.setDrawColor(200, 200, 200);
             doc.line(20, y, 190, y);
-            y += 10;
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(30, 30, 30);
-            doc.text('PRICE BREAKDOWN', 20, y);
-
-            y += 10;
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(10);
-            result.items.forEach(item => {
-                doc.setTextColor(80, 80, 80);
-                const lines = doc.splitTextToSize(item.label, 130);
-                doc.text(lines, 20, y);
-                doc.setTextColor(30, 30, 30);
-                doc.text(`£${item.amount.toFixed(2)}`, 190, y, { align: 'right' });
-                y += 7 * lines.length;
-            });
-
-            y += 3;
-            doc.setDrawColor(30, 30, 30);
-            doc.line(130, y, 190, y);
-            y += 10;
+            y += 12;
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 30, 30);
             doc.text('TOTAL', 20, y);
             doc.text(`£${result.total.toFixed(2)}`, 190, y, { align: 'right' });
 
