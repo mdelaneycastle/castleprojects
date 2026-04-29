@@ -602,6 +602,94 @@
             color: var(--text-primary);
         }
 
+        .spec-glass-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            padding: 0.75rem 1rem;
+        }
+
+        .spec-glass-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .spec-glass-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            flex: 1;
+        }
+
+        .spec-glass-label input[type="radio"] {
+            accent-color: var(--accent-gold);
+            cursor: pointer;
+        }
+
+        .info-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 1px solid var(--border-hover);
+            background: transparent;
+            color: var(--accent-gold);
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 0.85rem;
+            line-height: 1;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, color 0.2s ease;
+            padding: 0;
+        }
+
+        .info-icon:hover,
+        .info-icon.active {
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+        }
+
+        .spec-glass-popup {
+            margin-top: 0.75rem;
+            padding: 0.9rem 1rem;
+            background: rgba(201, 169, 98, 0.05);
+            border: 1px solid var(--border-subtle);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .spec-glass-popup strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.95rem;
+        }
+
+        .spec-glass-popup ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .spec-glass-popup li {
+            padding: 0.15rem 0;
+        }
+
+        .spec-glass-popup li::before {
+            content: '— ';
+            color: var(--accent-gold);
+        }
+
         .total-row {
             display: flex;
             justify-content: space-between;
@@ -1145,6 +1233,35 @@
                                 <option value="specialised">Specialised Glass (UV/Museum)</option>
                             </select>
                         </div>
+                        <div id="specialisedGlassBlock" class="calc-group full-width" style="display:none; margin-top: 1rem;">
+                            <label class="calc-label">
+                                <span id="specGlassStepNum">6</span>. Specialised Glass Type
+                            </label>
+                            <div class="spec-glass-options" id="specGlassOptions">
+                                <div class="spec-glass-row">
+                                    <label class="spec-glass-label">
+                                        <input type="radio" name="specGlass" value="uvar70">
+                                        <span>UV AR/70</span>
+                                    </label>
+                                    <button type="button" class="info-icon" data-info="uvar70" aria-label="More info">i</button>
+                                </div>
+                                <div class="spec-glass-row">
+                                    <label class="spec-glass-label">
+                                        <input type="radio" name="specGlass" value="uvar99">
+                                        <span>UV AR/99 (Museum Glass)</span>
+                                    </label>
+                                    <button type="button" class="info-icon" data-info="uvar99" aria-label="More info">i</button>
+                                </div>
+                                <div class="spec-glass-row">
+                                    <label class="spec-glass-label">
+                                        <input type="radio" name="specGlass" value="museumAcrylic">
+                                        <span>Museum Acrylic (Perspex)</span>
+                                    </label>
+                                    <button type="button" class="info-icon" data-info="museumAcrylic" aria-label="More info">i</button>
+                                </div>
+                            </div>
+                            <div id="specGlassPopup" class="spec-glass-popup" style="display:none;"></div>
+                        </div>
                     </div>
                     <div id="glassUnmountedBlock" style="display:none;">
                         <label class="calc-label"><span id="glassUStepNum">4</span>. Glass</label>
@@ -1172,6 +1289,55 @@
                 <div id="framePreview">
                     <p style="color: var(--text-secondary); font-style: italic;">Select a frame to see a preview…</p>
                 </div>
+
+                <div class="calc-divider"></div>
+                <h2 class="calc-title">Glass Upgrade</h2>
+                <p class="calc-subtitle">For already-framed pieces — enter the framed size and pick a glass.</p>
+
+                <div class="calc-row" style="margin-top: 1rem;">
+                    <div class="calc-group">
+                        <label class="calc-label">Height (cm)</label>
+                        <input type="number" id="upgradeHeight" class="calc-input" placeholder="e.g. 60" min="1" step="0.1">
+                    </div>
+                    <div class="calc-group">
+                        <label class="calc-label">Width (cm)</label>
+                        <input type="number" id="upgradeWidth" class="calc-input" placeholder="e.g. 80" min="1" step="0.1">
+                    </div>
+                </div>
+
+                <div class="calc-group full-width" style="margin-top: 1rem;">
+                    <label class="calc-label">Glass</label>
+                    <div class="spec-glass-options">
+                        <div class="spec-glass-row">
+                            <label class="spec-glass-label">
+                                <input type="radio" name="upgradeGlass" value="uvar70">
+                                <span>UV AR/70</span>
+                            </label>
+                            <button type="button" class="info-icon" data-upgrade-info="uvar70" aria-label="More info">i</button>
+                        </div>
+                        <div class="spec-glass-row">
+                            <label class="spec-glass-label">
+                                <input type="radio" name="upgradeGlass" value="uvar99">
+                                <span>UV AR/99 (Museum Glass)</span>
+                            </label>
+                            <button type="button" class="info-icon" data-upgrade-info="uvar99" aria-label="More info">i</button>
+                        </div>
+                        <div class="spec-glass-row">
+                            <label class="spec-glass-label">
+                                <input type="radio" name="upgradeGlass" value="museumAcrylic">
+                                <span>Museum Acrylic (Perspex)</span>
+                            </label>
+                            <button type="button" class="info-icon" data-upgrade-info="museumAcrylic" aria-label="More info">i</button>
+                        </div>
+                    </div>
+                    <div id="upgradeInfoPopup" class="spec-glass-popup" style="display:none;"></div>
+                </div>
+
+                <div class="total-row grand-total" style="margin-top: 1.25rem;">
+                    <span>Glass Upgrade:</span>
+                    <span id="upgradeTotal">£0.00</span>
+                </div>
+                <button class="reset-btn" id="upgradeReset" style="margin-top: 0.75rem;">Reset</button>
             </div>
 
             <div class="calc-panel total-panel">
@@ -2011,6 +2177,7 @@
             mountType: '',     // '' | 'mounted' | 'unmounted'
             mount: 0,          // mm
             glass: '',         // glass type key
+            specialisedGlass: '', // 'uvar70' | 'uvar99' | 'museumAcrylic'
             includeGlass: false, // unmounted toggle
             frameCode: '',
             height: 0,
@@ -2022,6 +2189,39 @@
             specialised: 'Specialised Glass (UV/Museum)'
         };
 
+        // Specialised glass: priced per cm² (image area). Thickness in mm for frame depth.
+        const SPECIALISED_GLASS = {
+            uvar70: {
+                label: 'UV AR/70',
+                ratePerCm2: 0.02,
+                thickness: 2,
+                details: [
+                    '98% UV light protection',
+                    'Slight greenish colour',
+                    '2mm thickness'
+                ]
+            },
+            uvar99: {
+                label: 'UV AR/99 (Museum Glass)',
+                ratePerCm2: 0.028,
+                thickness: 2,
+                details: [
+                    '98% UV light protection',
+                    'Almost image perfect clarity',
+                    'Anti-reflective properties'
+                ]
+            },
+            museumAcrylic: {
+                label: 'Museum Acrylic (Perspex)',
+                ratePerCm2: 0.05,
+                thickness: 2,
+                details: [
+                    '98% UV light protection',
+                    'Almost image perfect clarity'
+                ]
+            }
+        };
+
         const MOUNT_LABELS = {
             15: 'Standard Float Mount',
             14: 'Float with Surround Mount',
@@ -2030,7 +2230,10 @@
 
         function getGlassThickness() {
             const s = quoteState;
-            if (s.glass === 'specialised') return 4;
+            if (s.glass === 'specialised') {
+                const spec = SPECIALISED_GLASS[s.specialisedGlass];
+                return spec ? spec.thickness : 4;
+            }
             if (s.glass === 'standard') {
                 const areaM2 = (s.height * s.width) / 10000;
                 return areaM2 > 5 ? 3 : 2;
@@ -2084,6 +2287,7 @@
             if (!s.frameCode || !framePricing[s.frameCode]) return result;
             if (!s.height || !s.width) return result;
             if (s.mountType === 'mounted' && (!s.mount || !s.glass)) return result;
+            if (s.mountType === 'mounted' && s.glass === 'specialised' && !s.specialisedGlass) return result;
 
             const frame = framePricing[s.frameCode];
             const perimeterM = (s.height * 2 + s.width * 2) / 100;
@@ -2099,10 +2303,19 @@
             result.items.push({ label: 'Day rate', amount: dayRate });
 
             if (s.mountType === 'mounted' || s.includeGlass) {
-                const glassCost = perimeterM * GLASS_RATE_PER_M;
-                const label = s.mountType === 'mounted'
-                    ? `Glass — ${GLASS_LABELS[s.glass] || s.glass}`
-                    : 'Glass';
+                let glassCost;
+                let label;
+                if (s.mountType === 'mounted' && s.glass === 'specialised') {
+                    const spec = SPECIALISED_GLASS[s.specialisedGlass];
+                    const areaCm2 = s.height * s.width;
+                    glassCost = areaCm2 * spec.ratePerCm2;
+                    label = `Glass — ${spec.label}`;
+                } else {
+                    glassCost = perimeterM * GLASS_RATE_PER_M;
+                    label = s.mountType === 'mounted'
+                        ? `Glass — ${GLASS_LABELS[s.glass] || s.glass}`
+                        : 'Glass';
+                }
                 result.items.push({ label, amount: glassCost });
             }
 
@@ -2182,8 +2395,20 @@
                 glassBlock.style.display = 'none';
             }
 
+            const specialisedBlock = document.getElementById('specialisedGlassBlock');
+            const showSpecialised = showGlassMounted && s.glass === 'specialised';
+            specialisedBlock.style.display = showSpecialised ? 'block' : 'none';
+            if (showSpecialised) {
+                step++;
+                document.getElementById('specGlassStepNum').textContent = step - 1;
+                document.querySelectorAll('input[name="specGlass"]').forEach(r => {
+                    r.checked = r.value === s.specialisedGlass;
+                });
+            }
+
             const frameBlock = document.getElementById('frameBlock');
-            const showFrame = (showGlassMounted && !!s.glass) || showGlassUnmounted;
+            const glassReady = showGlassMounted && (s.glass === 'standard' || (s.glass === 'specialised' && !!s.specialisedGlass));
+            const showFrame = glassReady || showGlassUnmounted;
             frameBlock.style.display = showFrame ? 'block' : 'none';
             if (showFrame) {
                 step++;
@@ -2237,6 +2462,7 @@
                     quoteState.mountType = '';
                     quoteState.mount = 0;
                     quoteState.glass = '';
+                    quoteState.specialisedGlass = '';
                     quoteState.includeGlass = false;
                     quoteState.frameCode = '';
                     quoteState.height = 0;
@@ -2255,10 +2481,12 @@
                 quoteState.mountType = btn.dataset.mounttype;
                 quoteState.mount = 0;
                 quoteState.glass = '';
+                quoteState.specialisedGlass = '';
                 quoteState.includeGlass = false;
                 quoteState.frameCode = '';
                 document.getElementById('mountSelect').value = '';
                 document.getElementById('glassSelect').value = '';
+                document.querySelectorAll('input[name="specGlass"]').forEach(r => { r.checked = false; });
                 document.querySelectorAll('[data-unglass]').forEach(b => b.classList.remove('active'));
                 document.querySelector('[data-unglass="no"]').classList.add('active');
                 renderCalculator();
@@ -2273,7 +2501,41 @@
 
         document.getElementById('glassSelect').addEventListener('change', (e) => {
             quoteState.glass = e.target.value;
+            quoteState.specialisedGlass = '';
+            quoteState.frameCode = '';
+            document.querySelectorAll('input[name="specGlass"]').forEach(r => { r.checked = false; });
+            const popup = document.getElementById('specGlassPopup');
+            if (popup) popup.style.display = 'none';
+            document.querySelectorAll('.info-icon[data-info]').forEach(b => b.classList.remove('active'));
             renderCalculator();
+        });
+
+        document.querySelectorAll('input[name="specGlass"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                quoteState.specialisedGlass = e.target.value;
+                quoteState.frameCode = '';
+                renderCalculator();
+            });
+        });
+
+        document.querySelectorAll('.info-icon[data-info]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const key = btn.dataset.info;
+                const spec = SPECIALISED_GLASS[key];
+                const popup = document.getElementById('specGlassPopup');
+                if (!spec || !popup) return;
+                const alreadyActive = btn.classList.contains('active');
+                document.querySelectorAll('.info-icon[data-info]').forEach(b => b.classList.remove('active'));
+                if (alreadyActive) {
+                    popup.style.display = 'none';
+                    return;
+                }
+                btn.classList.add('active');
+                const items = spec.details.map(d => `<li>${d}</li>`).join('');
+                popup.innerHTML = `<strong>${spec.label}</strong><ul>${items}</ul>`;
+                popup.style.display = 'block';
+            });
         });
 
         document.querySelectorAll('[data-unglass]').forEach(btn => {
@@ -2303,16 +2565,84 @@
         document.getElementById('resetCalc').addEventListener('click', () => {
             Object.assign(quoteState, {
                 artist: '', path: '', mountType: '', mount: 0,
-                glass: '', includeGlass: false, frameCode: '', height: 0, width: 0
+                glass: '', specialisedGlass: '', includeGlass: false, frameCode: '', height: 0, width: 0
             });
             document.getElementById('artistSelect').value = '';
             document.getElementById('mountSelect').value = '';
             document.getElementById('glassSelect').value = '';
             document.getElementById('heightInput').value = '';
             document.getElementById('widthInput').value = '';
+            document.querySelectorAll('input[name="specGlass"]').forEach(r => { r.checked = false; });
+            const popup = document.getElementById('specGlassPopup');
+            if (popup) popup.style.display = 'none';
+            document.querySelectorAll('.info-icon[data-info]').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('[data-mounttype], [data-quotepath], [data-unglass]').forEach(b => b.classList.remove('active'));
             document.querySelector('[data-unglass="no"]').classList.add('active');
             renderCalculator();
+        });
+
+        // Glass Upgrade Calculator (standalone)
+        const upgradeState = { height: 0, width: 0, glass: '' };
+
+        function renderUpgrade() {
+            const totalEl = document.getElementById('upgradeTotal');
+            const spec = SPECIALISED_GLASS[upgradeState.glass];
+            if (!spec || !upgradeState.height || !upgradeState.width) {
+                totalEl.textContent = '£0.00';
+                return;
+            }
+            const cost = upgradeState.height * upgradeState.width * spec.ratePerCm2;
+            totalEl.textContent = `£${cost.toFixed(2)}`;
+        }
+
+        document.getElementById('upgradeHeight').addEventListener('input', (e) => {
+            upgradeState.height = parseFloat(e.target.value) || 0;
+            renderUpgrade();
+        });
+
+        document.getElementById('upgradeWidth').addEventListener('input', (e) => {
+            upgradeState.width = parseFloat(e.target.value) || 0;
+            renderUpgrade();
+        });
+
+        document.querySelectorAll('input[name="upgradeGlass"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                upgradeState.glass = e.target.value;
+                renderUpgrade();
+            });
+        });
+
+        document.querySelectorAll('.info-icon[data-upgrade-info]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const key = btn.dataset.upgradeInfo;
+                const spec = SPECIALISED_GLASS[key];
+                const popup = document.getElementById('upgradeInfoPopup');
+                if (!spec || !popup) return;
+                const alreadyActive = btn.classList.contains('active');
+                document.querySelectorAll('.info-icon[data-upgrade-info]').forEach(b => b.classList.remove('active'));
+                if (alreadyActive) {
+                    popup.style.display = 'none';
+                    return;
+                }
+                btn.classList.add('active');
+                const items = spec.details.map(d => `<li>${d}</li>`).join('');
+                popup.innerHTML = `<strong>${spec.label}</strong><ul>${items}</ul>`;
+                popup.style.display = 'block';
+            });
+        });
+
+        document.getElementById('upgradeReset').addEventListener('click', () => {
+            upgradeState.height = 0;
+            upgradeState.width = 0;
+            upgradeState.glass = '';
+            document.getElementById('upgradeHeight').value = '';
+            document.getElementById('upgradeWidth').value = '';
+            document.querySelectorAll('input[name="upgradeGlass"]').forEach(r => { r.checked = false; });
+            const popup = document.getElementById('upgradeInfoPopup');
+            if (popup) popup.style.display = 'none';
+            document.querySelectorAll('.info-icon[data-upgrade-info]').forEach(b => b.classList.remove('active'));
+            renderUpgrade();
         });
 
         // Initial render
@@ -2390,7 +2720,11 @@
             if (s.path === 'custom') {
                 if (s.mountType === 'mounted') {
                     addRow('Mount:', MOUNT_LABELS[s.mount] || 'Mount');
-                    addRow('Glass:', GLASS_LABELS[s.glass] || s.glass);
+                    let glassLabel = GLASS_LABELS[s.glass] || s.glass;
+                    if (s.glass === 'specialised' && SPECIALISED_GLASS[s.specialisedGlass]) {
+                        glassLabel = SPECIALISED_GLASS[s.specialisedGlass].label;
+                    }
+                    addRow('Glass:', glassLabel);
                 } else if (s.mountType === 'unmounted') {
                     addRow('Glass:', s.includeGlass ? 'Yes' : 'No');
                 }
