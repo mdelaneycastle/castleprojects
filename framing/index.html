@@ -749,6 +749,66 @@
             margin-top: 1.5rem;
         }
 
+        .reset-row {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .reset-row .reset-btn {
+            margin-top: 0;
+            min-width: 240px;
+            flex: 0 0 auto;
+        }
+
+        .quote-chooser {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .quote-chooser-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-hover);
+            padding: 2rem;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .quote-chooser-panel h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-chooser-panel p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quote-chooser-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .quote-chooser-buttons .export-btn {
+            flex: 1 1 auto;
+        }
+
+        .chooser-cancel {
+            margin-top: 0;
+        }
+
         .btn-row .reset-btn {
             margin-top: 0;
             flex: 1;
@@ -1337,7 +1397,10 @@
                     <span>Glass Upgrade:</span>
                     <span id="upgradeTotal">£0.00</span>
                 </div>
-                <button class="reset-btn" id="upgradeReset" style="margin-top: 0.75rem;">Reset</button>
+            </div>
+
+            <div class="reset-row">
+                <button class="reset-btn" id="resetCalc">Reset Everything</button>
             </div>
 
             <div class="calc-panel total-panel">
@@ -1345,10 +1408,21 @@
                     <span>Total Quote:</span>
                     <span id="grandTotal">£0.00</span>
                 </div>
-                <div class="btn-row">
-                    <button class="reset-btn" id="resetCalc">Reset</button>
+                <div class="btn-row" style="justify-content: center;">
                     <button class="export-btn" id="exportPdf">Export Quote PDF</button>
                 </div>
+            </div>
+        </div>
+
+        <div class="quote-chooser" id="quoteChooser" style="display:none;">
+            <div class="quote-chooser-panel">
+                <h3>Which quote would you like to export?</h3>
+                <p>You've filled in both quotes. They're tracked separately — pick one to export.</p>
+                <div class="quote-chooser-buttons">
+                    <button class="export-btn" id="chooseFraming">Framing Quote</button>
+                    <button class="export-btn" id="chooseUpgrade">Glass Upgrade Quote</button>
+                </div>
+                <button class="reset-btn chooser-cancel" id="chooserCancel">Cancel</button>
             </div>
         </div>
     </section>
@@ -2578,6 +2652,19 @@
             document.querySelectorAll('.info-icon[data-info]').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('[data-mounttype], [data-quotepath], [data-unglass]').forEach(b => b.classList.remove('active'));
             document.querySelector('[data-unglass="no"]').classList.add('active');
+
+            // also reset glass upgrade
+            upgradeState.height = 0;
+            upgradeState.width = 0;
+            upgradeState.glass = '';
+            document.getElementById('upgradeHeight').value = '';
+            document.getElementById('upgradeWidth').value = '';
+            document.querySelectorAll('input[name="upgradeGlass"]').forEach(r => { r.checked = false; });
+            const upPopup = document.getElementById('upgradeInfoPopup');
+            if (upPopup) upPopup.style.display = 'none';
+            document.querySelectorAll('.info-icon[data-upgrade-info]').forEach(b => b.classList.remove('active'));
+            renderUpgrade();
+
             renderCalculator();
         });
 
@@ -2632,39 +2719,19 @@
             });
         });
 
-        document.getElementById('upgradeReset').addEventListener('click', () => {
-            upgradeState.height = 0;
-            upgradeState.width = 0;
-            upgradeState.glass = '';
-            document.getElementById('upgradeHeight').value = '';
-            document.getElementById('upgradeWidth').value = '';
-            document.querySelectorAll('input[name="upgradeGlass"]').forEach(r => { r.checked = false; });
-            const popup = document.getElementById('upgradeInfoPopup');
-            if (popup) popup.style.display = 'none';
-            document.querySelectorAll('.info-icon[data-upgrade-info]').forEach(b => b.classList.remove('active'));
-            renderUpgrade();
-        });
+        // (upgrade reset is handled by the unified resetCalc handler above)
 
         // Initial render
         renderCalculator();
 
         // PDF Export
-        document.getElementById('exportPdf').addEventListener('click', () => {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const result = computeQuote();
-
-            if (!result.valid) {
-                alert('Please complete the quote before exporting.');
-                return;
-            }
-
-            const s = quoteState;
+        function buildPdfHeader(doc, title) {
             const today = new Date();
             const dateStr = today.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
             const quoteNum = 'Q' + today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0') + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
 
             const logoImg = document.getElementById('pdfLogo');
+            let logoOk = false;
             if (logoImg && logoImg.complete) {
                 try {
                     const canvas = document.createElement('canvas');
@@ -2674,13 +2741,10 @@
                     ctx.drawImage(logoImg, 0, 0);
                     const imgData = canvas.toDataURL('image/png');
                     doc.addImage(imgData, 'PNG', 20, 12, 80, 16);
-                } catch(e) {
-                    doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(24);
-                    doc.setTextColor(30, 30, 30);
-                    doc.text('CASTLE FINE ART', 20, 25);
-                }
-            } else {
+                    logoOk = true;
+                } catch(e) { /* fall through */ }
+            }
+            if (!logoOk) {
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(24);
                 doc.setTextColor(30, 30, 30);
@@ -2689,12 +2753,36 @@
 
             doc.setFontSize(10);
             doc.setTextColor(100, 100, 100);
-            doc.text('FRAMING QUOTE', 20, 35);
+            doc.text(title, 20, 35);
             doc.text(`Date: ${dateStr}`, 190, 20, { align: 'right' });
             doc.text(`Quote #: ${quoteNum}`, 190, 26, { align: 'right' });
 
             doc.setDrawColor(200, 200, 200);
             doc.line(20, 42, 190, 42);
+
+            return { quoteNum };
+        }
+
+        function buildPdfFooter(doc) {
+            const y = 270;
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(120, 120, 120);
+            doc.text('This quote is valid for 30 days from the date of issue.', 105, y, { align: 'center' });
+            doc.text('Prices are estimates and may vary based on final specifications.', 105, y + 5, { align: 'center' });
+            doc.text('Castle Fine Art | www.castlefineart.com', 105, y + 12, { align: 'center' });
+        }
+
+        function exportFramingQuote() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const result = computeQuote();
+            if (!result.valid) {
+                alert('Please complete the framing quote before exporting.');
+                return;
+            }
+            const s = quoteState;
+            const { quoteNum } = buildPdfHeader(doc, 'FRAMING QUOTE');
 
             let y = 55;
             doc.setFontSize(12);
@@ -2746,16 +2834,89 @@
             doc.text('TOTAL', 20, y);
             doc.text(`£${result.total.toFixed(2)}`, 190, y, { align: 'right' });
 
-            y = 270;
-            doc.setFontSize(8);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(120, 120, 120);
-            doc.text('This quote is valid for 30 days from the date of issue.', 105, y, { align: 'center' });
-            doc.text('Prices are estimates and may vary based on final specifications.', 105, y + 5, { align: 'center' });
-            doc.text('Castle Fine Art | www.castlefineart.com', 105, y + 12, { align: 'center' });
-
+            buildPdfFooter(doc);
             const filename = s.frameCode ? `CFA-Quote-${s.frameCode}-${quoteNum}.pdf` : `CFA-Quote-${quoteNum}.pdf`;
             doc.save(filename);
+        }
+
+        function isUpgradeValid() {
+            return upgradeState.height > 0 && upgradeState.width > 0 && !!SPECIALISED_GLASS[upgradeState.glass];
+        }
+
+        function exportUpgradeQuote() {
+            if (!isUpgradeValid()) {
+                alert('Please complete the glass upgrade quote before exporting.');
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const spec = SPECIALISED_GLASS[upgradeState.glass];
+            const total = upgradeState.height * upgradeState.width * spec.ratePerCm2;
+            const { quoteNum } = buildPdfHeader(doc, 'GLASS UPGRADE QUOTE');
+
+            let y = 55;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 30, 30);
+            doc.text('QUOTE DETAILS', 20, y);
+
+            y += 10;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            function addRow(label, value) {
+                doc.setTextColor(80, 80, 80);
+                doc.text(label, 20, y);
+                doc.setTextColor(30, 30, 30);
+                doc.text(String(value), 70, y);
+                y += 7;
+            }
+            addRow('Quote Type:', 'Glass Upgrade');
+            addRow('Glass:', spec.label);
+            addRow('Framed Size:', `${upgradeState.height}cm × ${upgradeState.width}cm`);
+
+            y += 5;
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, y, 190, y);
+            y += 12;
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 30, 30);
+            doc.text('TOTAL', 20, y);
+            doc.text(`£${total.toFixed(2)}`, 190, y, { align: 'right' });
+
+            buildPdfFooter(doc);
+            doc.save(`CFA-GlassUpgrade-${quoteNum}.pdf`);
+        }
+
+        function showQuoteChooser() {
+            document.getElementById('quoteChooser').style.display = 'flex';
+        }
+        function hideQuoteChooser() {
+            document.getElementById('quoteChooser').style.display = 'none';
+        }
+
+        document.getElementById('exportPdf').addEventListener('click', () => {
+            const framingValid = computeQuote().valid;
+            const upgradeValid = isUpgradeValid();
+            if (framingValid && upgradeValid) {
+                showQuoteChooser();
+                return;
+            }
+            if (upgradeValid) { exportUpgradeQuote(); return; }
+            exportFramingQuote();
+        });
+
+        document.getElementById('chooseFraming').addEventListener('click', () => {
+            hideQuoteChooser();
+            exportFramingQuote();
+        });
+        document.getElementById('chooseUpgrade').addEventListener('click', () => {
+            hideQuoteChooser();
+            exportUpgradeQuote();
+        });
+        document.getElementById('chooserCancel').addEventListener('click', hideQuoteChooser);
+        document.getElementById('quoteChooser').addEventListener('click', (e) => {
+            if (e.target.id === 'quoteChooser') hideQuoteChooser();
         });
 
         // Admin functionality
