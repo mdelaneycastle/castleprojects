@@ -2496,23 +2496,52 @@
             document.getElementById('grandTotal').textContent = result.valid ? `£${result.total.toFixed(2)}` : '£0.00';
         }
 
+        const MOUNT_IMAGES = {
+            15: { src: 'standardfloat.webp', label: 'Standard Float Mount' },
+            14: { src: 'floatwithsurround.webp', label: 'Float with Surround Mount' },
+            6:  { src: 'window.webp', label: 'Window Mount' }
+        };
+
         function renderFramePreview() {
             const preview = document.getElementById('framePreview');
             const code = quoteState.frameCode;
-            if (!code) {
+            const mountImg = quoteState.mountType === 'mounted' ? MOUNT_IMAGES[quoteState.mount] : null;
+
+            if (!code && !mountImg) {
                 preview.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">Select a frame to see a preview…</p>';
                 return;
             }
-            const meta = framesData.find(f => f.code === code);
-            const imageUrl = meta && meta.image ? meta.image : `${code}_4.jpg`;
-            const title = meta ? meta.title : code;
-            preview.innerHTML = `
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 1rem 0;">
-                    <img src="${imageUrl}" alt="${title}" style="max-width: 100%; max-height: 320px; object-fit: contain; filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));" onerror="this.style.display='none'">
-                    <div style="text-align: center;">
-                        <div style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--text-primary);">${title}</div>
-                        <div style="color: var(--accent-gold); font-size: 0.85rem; letter-spacing: 0.1em; margin-top: 0.25rem;">${code}</div>
+
+            let mountBlock = '';
+            if (mountImg) {
+                mountBlock = `
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                        <img src="${mountImg.src}" alt="${mountImg.label}" style="max-width: 100%; max-height: 320px; object-fit: contain; filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));" onerror="this.style.display='none'">
+                        <div style="color: var(--accent-gold); font-size: 0.85rem; letter-spacing: 0.1em;">${mountImg.label}</div>
                     </div>
+                `;
+            }
+
+            let frameBlock = '';
+            if (code) {
+                const meta = framesData.find(f => f.code === code);
+                const imageUrl = meta && meta.image ? meta.image : `${code}_4.jpg`;
+                const title = meta ? meta.title : code;
+                frameBlock = `
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                        <img src="${imageUrl}" alt="${title}" style="max-width: 100%; max-height: 320px; object-fit: contain; filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));" onerror="this.style.display='none'">
+                        <div style="text-align: center;">
+                            <div style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--text-primary);">${title}</div>
+                            <div style="color: var(--accent-gold); font-size: 0.85rem; letter-spacing: 0.1em; margin-top: 0.25rem;">${code}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            preview.innerHTML = `
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 2rem; padding: 1rem 0;">
+                    ${mountBlock}
+                    ${frameBlock}
                 </div>
             `;
         }
