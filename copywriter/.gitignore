@@ -1,6 +1,22 @@
+# Python
 __pycache__/
 *.py[cod]
 venv/
+venv313/
 .env
+
+# Streamlit secrets (contains API keys)
 .streamlit/secrets.toml
+
+# Local data (now in Supabase)
+artists/
+cache/
+chroma_db/
+art_brain_db/
+data/
+
+# OS
 .DS_Store
+
+# Migration script (one-time use, contains local paths)
+migrate_to_supabase.py

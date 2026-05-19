@@ -176,3 +176,33 @@ def get_generated_copy(artist_id: str) -> list[dict]:
 def delete_generated_copy(copy_id: str) -> None:
     """Delete a piece of generated copy."""
     get_supabase().table("generated_copy").delete().eq("id", copy_id).execute()
+
+
+# --- Local-testing backend override ---------------------------------------
+# When USE_LOCAL_DB is truthy (env var or Streamlit secret), all storage
+# operations are served by local_storage.py (SQLite + local folder) instead
+# of Supabase. Production behaviour is unchanged when the flag is unset.
+def _use_local_db() -> bool:
+    import os as _os
+    if _os.environ.get("USE_LOCAL_DB", "").lower() in ("1", "true", "yes"):
+        return True
+    try:
+        return str(st.secrets.get("USE_LOCAL_DB", "")).lower() in ("1", "true", "yes")
+    except Exception:
+        return False
+
+
+if _use_local_db():
+    from local_storage import (  # noqa: F401,F811
+        get_artists,
+        get_artist_by_slug,
+        create_artist,
+        get_style_guide,
+        save_style_guide,
+        get_documents,
+        upload_document,
+        delete_document,
+        save_generated_copy,
+        get_generated_copy,
+        delete_generated_copy,
+    )
