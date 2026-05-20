@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-primary: #0a0a0a;
@@ -2046,6 +2047,13 @@
 
         // Stock management - must be defined before createFrameCard
         const ADMIN_PASSWORD = 'cfa2026';
+
+        // --- Supabase (shared stock state across all browsers) ---
+        const SUPABASE_URL = 'https://xhoknyiomfbhscwbyvbp.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_soR5vsPetTr7U94W4-g9QA_745fd9fk';
+        const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Local cache: keeps reads synchronous and the UI working if Supabase is unreachable.
         let stockStatus = JSON.parse(localStorage.getItem('frameStockStatus') || '{}');
         let restockDates = JSON.parse(localStorage.getItem('frameRestockDates') || '{}');
 
@@ -2072,7 +2080,76 @@
                 delete restockDates[code];
             }
             saveRestockDates();
+            pushFrameStock(code);
         }
+
+        // Push one frame's current state up to Supabase. If it's fully back to default
+        // (in stock and no restock date), delete the row to keep the table tidy.
+        async function pushFrameStock(code) {
+            if (!code) return;
+            const out = isOutOfStock(code);
+            const date = getRestockDate(code) || null;
+            try {
+                if (!out && !date) {
+                    await supa.from('frame_stock').delete().eq('code', code);
+                } else {
+                    await supa.from('frame_stock').upsert({
+                        code,
+                        out_of_stock: out,
+                        restock_date: date,
+                        updated_at: new Date().toISOString()
+                    });
+                }
+            } catch (e) {
+                console.error('Supabase write failed for', code, e);
+            }
+        }
+
+        // Apply a Supabase row (or deletion) to the local cache.
+        function applyRow(row, deleted = false) {
+            if (!row || !row.code) return;
+            if (deleted) {
+                delete stockStatus[row.code];
+                delete restockDates[row.code];
+            } else {
+                if (row.out_of_stock) stockStatus[row.code] = false; else delete stockStatus[row.code];
+                if (row.restock_date) restockDates[row.code] = row.restock_date; else delete restockDates[row.code];
+            }
+            saveStockStatus();
+            saveRestockDates();
+        }
+
+        // Pull the whole table once on load, then keep listening for changes from other browsers.
+        async function initStockSync() {
+            try {
+                const { data, error } = await supa.from('frame_stock').select('code, out_of_stock, restock_date');
+                if (error) throw error;
+                // Reset local cache to exactly match the server (server is the source of truth).
+                stockStatus = {};
+                restockDates = {};
+                (data || []).forEach(r => applyRow(r));
+                saveStockStatus();
+                saveRestockDates();
+                if (typeof renderFrames === 'function') renderFrames(framesData);
+                if (typeof renderStockList === 'function' && document.getElementById('stockList')) renderStockList();
+            } catch (e) {
+                console.warn('Supabase initial load failed; using local cache.', e);
+            }
+
+            supa.channel('frame_stock_changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'frame_stock' }, payload => {
+                    if (payload.eventType === 'DELETE') {
+                        applyRow(payload.old, true);
+                    } else {
+                        applyRow(payload.new);
+                    }
+                    if (typeof renderFrames === 'function') renderFrames(framesData);
+                    if (typeof renderStockList === 'function' && document.getElementById('stockList')) renderStockList();
+                })
+                .subscribe();
+        }
+        // Kick off as soon as the page is parsed; runs in parallel with the initial render below.
+        window.addEventListener('DOMContentLoaded', initStockSync);
 
         function formatRestockDate(dateStr) {
             if (!dateStr) return '';
@@ -3074,6 +3151,7 @@
                     }
 
                     saveStockStatus();
+                    pushFrameStock(code);
                     renderStockList();
                     renderFrames(framesData); // Refresh catalogue
                 });
