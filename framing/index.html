@@ -1431,15 +1431,18 @@
     <!-- Admin Section -->
     <section class="admin-section" id="adminSection" style="display: none;">
         <div class="admin-container">
-            <!-- Magic-link sign-in -->
+            <!-- Sign-in: password if entered, otherwise magic link -->
             <div class="admin-login" id="adminLogin">
                 <div class="login-panel">
                     <h2 class="calc-title">Admin Access</h2>
-                    <p class="calc-subtitle">Enter your email — we'll send you a one-time sign-in link.</p>
+                    <p class="calc-subtitle">Enter your password to sign in, or leave it blank to get a one-time magic link by email.</p>
                     <div class="calc-group">
                         <input type="email" id="adminEmail" class="calc-input" placeholder="you@example.com" autocomplete="email">
                     </div>
-                    <button class="export-btn" id="adminLoginBtn" style="margin-top: 1rem;">Send magic link</button>
+                    <div class="calc-group" style="margin-top: 0.5rem;">
+                        <input type="password" id="adminPassword" class="calc-input" placeholder="Password (optional)" autocomplete="current-password">
+                    </div>
+                    <button class="export-btn" id="adminLoginBtn" style="margin-top: 1rem;">Sign in</button>
                     <p class="login-error" id="loginError" style="display: none;"></p>
                     <p id="loginInfo" style="display: none; color: var(--accent-gold); margin-top: 0.75rem; font-size: 0.9rem;"></p>
                 </div>
@@ -3024,10 +3027,11 @@
             if (e.target.id === 'quoteChooser') hideQuoteChooser();
         });
 
-        // Admin functionality (Supabase magic-link auth)
+        // Admin functionality (Supabase auth — password or magic link)
         const adminLogin = document.getElementById('adminLogin');
         const adminPanel = document.getElementById('adminPanel');
         const adminEmail = document.getElementById('adminEmail');
+        const adminPasswordInput = document.getElementById('adminPassword');
         const adminLoginBtn = document.getElementById('adminLoginBtn');
         const adminLogout = document.getElementById('adminLogout');
         const loginError = document.getElementById('loginError');
@@ -3048,6 +3052,7 @@
             adminLogin.style.display = 'flex';
             adminPanel.style.display = 'none';
             if (adminEmail) adminEmail.value = '';
+            if (adminPasswordInput) adminPasswordInput.value = '';
             if (loginError) loginError.style.display = 'none';
             if (loginInfo) loginInfo.style.display = 'none';
         }
@@ -3063,6 +3068,7 @@
 
         adminLoginBtn.addEventListener('click', async () => {
             const email = (adminEmail.value || '').trim();
+            const password = (adminPasswordInput.value || '');
             if (!email) {
                 loginError.textContent = 'Please enter your email address.';
                 loginError.style.display = 'block';
@@ -3073,16 +3079,24 @@
             loginInfo.style.display = 'none';
             adminLoginBtn.disabled = true;
             const originalLabel = adminLoginBtn.textContent;
-            adminLoginBtn.textContent = 'Sending…';
             try {
-                // Strip any hash fragment so the return URL is clean.
-                const redirectTo = window.location.href.split('#')[0];
-                const { error } = await supa.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
-                if (error) throw error;
-                loginInfo.textContent = 'Check your inbox — click the link to sign in.';
-                loginInfo.style.display = 'block';
+                if (password) {
+                    // Password path — instant sign-in, no email needed.
+                    adminLoginBtn.textContent = 'Signing in…';
+                    const { error } = await supa.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    // onAuthStateChange will show the panel.
+                } else {
+                    // Magic-link path — sends an email with a one-time link.
+                    adminLoginBtn.textContent = 'Sending…';
+                    const redirectTo = window.location.href.split('#')[0];
+                    const { error } = await supa.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
+                    if (error) throw error;
+                    loginInfo.textContent = 'Check your inbox — click the link to sign in.';
+                    loginInfo.style.display = 'block';
+                }
             } catch (e) {
-                loginError.textContent = e.message || 'Could not send link. Please try again.';
+                loginError.textContent = e.message || 'Sign-in failed. Please try again.';
                 loginError.style.display = 'block';
             } finally {
                 adminLoginBtn.disabled = false;
@@ -3090,8 +3104,10 @@
             }
         });
 
-        adminEmail.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') adminLoginBtn.click();
+        // Enter key submits from either field.
+        [adminEmail, adminPasswordInput].forEach(el => {
+            if (!el) return;
+            el.addEventListener('keypress', (e) => { if (e.key === 'Enter') adminLoginBtn.click(); });
         });
 
         adminLogout.addEventListener('click', async () => {
