@@ -1431,16 +1431,17 @@
     <!-- Admin Section -->
     <section class="admin-section" id="adminSection" style="display: none;">
         <div class="admin-container">
-            <!-- Password Gate -->
+            <!-- Magic-link sign-in -->
             <div class="admin-login" id="adminLogin">
                 <div class="login-panel">
                     <h2 class="calc-title">Admin Access</h2>
-                    <p class="calc-subtitle">Enter password to manage stock levels</p>
+                    <p class="calc-subtitle">Enter your email — we'll send you a one-time sign-in link.</p>
                     <div class="calc-group">
-                        <input type="password" id="adminPassword" class="calc-input" placeholder="Enter password">
+                        <input type="email" id="adminEmail" class="calc-input" placeholder="you@example.com" autocomplete="email">
                     </div>
-                    <button class="export-btn" id="adminLoginBtn" style="margin-top: 1rem;">Login</button>
-                    <p class="login-error" id="loginError" style="display: none;">Incorrect password</p>
+                    <button class="export-btn" id="adminLoginBtn" style="margin-top: 1rem;">Send magic link</button>
+                    <p class="login-error" id="loginError" style="display: none;"></p>
+                    <p id="loginInfo" style="display: none; color: var(--accent-gold); margin-top: 0.75rem; font-size: 0.9rem;"></p>
                 </div>
             </div>
 
@@ -2046,9 +2047,7 @@
         ];
 
         // Stock management - must be defined before createFrameCard
-        const ADMIN_PASSWORD = 'cfa2026';
-
-        // --- Supabase (shared stock state across all browsers) ---
+        // --- Supabase (shared stock state across all browsers + admin auth) ---
         const SUPABASE_URL = 'https://xhoknyiomfbhscwbyvbp.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_soR5vsPetTr7U94W4-g9QA_745fd9fk';
         const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -3025,16 +3024,16 @@
             if (e.target.id === 'quoteChooser') hideQuoteChooser();
         });
 
-        // Admin functionality
+        // Admin functionality (Supabase magic-link auth)
         const adminLogin = document.getElementById('adminLogin');
         const adminPanel = document.getElementById('adminPanel');
-        const adminPassword = document.getElementById('adminPassword');
+        const adminEmail = document.getElementById('adminEmail');
         const adminLoginBtn = document.getElementById('adminLoginBtn');
         const adminLogout = document.getElementById('adminLogout');
         const loginError = document.getElementById('loginError');
+        const loginInfo = document.getElementById('loginInfo');
         const stockList = document.getElementById('stockList');
 
-        let isAdminLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true';
         let adminSearchQuery = '';
 
         function showAdminPanel() {
@@ -3048,32 +3047,55 @@
             if (!adminLogin || !adminPanel) return;
             adminLogin.style.display = 'flex';
             adminPanel.style.display = 'none';
-            if (adminPassword) adminPassword.value = '';
+            if (adminEmail) adminEmail.value = '';
             if (loginError) loginError.style.display = 'none';
+            if (loginInfo) loginInfo.style.display = 'none';
         }
 
-        if (isAdminLoggedIn) {
-            showAdminPanel();
-        }
+        // Reflect session state in the UI (covers initial load, magic-link return, manual sign-out).
+        supa.auth.onAuthStateChange((_event, session) => {
+            if (session) showAdminPanel(); else hideAdminPanel();
+        });
+        // Initial check in case onAuthStateChange hasn't fired yet (page reload with stored session).
+        supa.auth.getSession().then(({ data: { session } }) => {
+            if (session) showAdminPanel();
+        });
 
-        adminLoginBtn.addEventListener('click', () => {
-            if (adminPassword.value === ADMIN_PASSWORD) {
-                isAdminLoggedIn = true;
-                sessionStorage.setItem('adminLoggedIn', 'true');
-                showAdminPanel();
-            } else {
+        adminLoginBtn.addEventListener('click', async () => {
+            const email = (adminEmail.value || '').trim();
+            if (!email) {
+                loginError.textContent = 'Please enter your email address.';
                 loginError.style.display = 'block';
-                adminPassword.value = '';
+                loginInfo.style.display = 'none';
+                return;
+            }
+            loginError.style.display = 'none';
+            loginInfo.style.display = 'none';
+            adminLoginBtn.disabled = true;
+            const originalLabel = adminLoginBtn.textContent;
+            adminLoginBtn.textContent = 'Sending…';
+            try {
+                // Strip any hash fragment so the return URL is clean.
+                const redirectTo = window.location.href.split('#')[0];
+                const { error } = await supa.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
+                if (error) throw error;
+                loginInfo.textContent = 'Check your inbox — click the link to sign in.';
+                loginInfo.style.display = 'block';
+            } catch (e) {
+                loginError.textContent = e.message || 'Could not send link. Please try again.';
+                loginError.style.display = 'block';
+            } finally {
+                adminLoginBtn.disabled = false;
+                adminLoginBtn.textContent = originalLabel;
             }
         });
 
-        adminPassword.addEventListener('keypress', (e) => {
+        adminEmail.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') adminLoginBtn.click();
         });
 
-        adminLogout.addEventListener('click', () => {
-            isAdminLoggedIn = false;
-            sessionStorage.removeItem('adminLoggedIn');
+        adminLogout.addEventListener('click', async () => {
+            await supa.auth.signOut();
             hideAdminPanel();
         });
 
