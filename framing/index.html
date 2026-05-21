@@ -1495,6 +1495,7 @@
             "441227000": { price: 4.26, rebate: 28 },
             "513167000": { price: 6.61, rebate: 41 },
             "513287000": { price: 6.82, rebate: 41 },
+            "517167000": { price: 3.96, rebate: 23 },
             "532167000": { price: 3.35, rebate: 21 },
             "549650":    { price: 6.92, rebate: 15 },
             "601167000": { price: 8.69, rebate: 24 },
@@ -1619,8 +1620,8 @@
             },
             {
                 code: "283502753",
-                title: "Andover Gold",
-                description: "Classic Andover profile in gold finish.",
+                title: "Andover Bronze",
+                description: "Classic Andover profile in bronze finish.",
                 usedOn: ["PCO"],
                 alternative: "277501753",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-andover-moulding-fsc-283502753",
@@ -1628,8 +1629,8 @@
             },
             {
                 code: "283502773",
-                title: "Andover Silver",
-                description: "Classic Andover profile in silver finish.",
+                title: "Andover Copper",
+                description: "Classic Andover profile in copper finish.",
                 usedOn: ["PCO"],
                 alternative: "277501773",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-andover-moulding-fsc-283502773",
@@ -1637,8 +1638,8 @@
             },
             {
                 code: "283502673",
-                title: "Andover Bronze",
-                description: "Classic Andover profile in bronze finish.",
+                title: "Andover Gold",
+                description: "Classic Andover profile in gold finish.",
                 usedOn: ["PCO"],
                 alternative: "277501673",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-andover-moulding-fsc-283502673",
@@ -1646,8 +1647,8 @@
             },
             {
                 code: "283502653",
-                title: "Andover Copper",
-                description: "Classic Andover profile in copper finish.",
+                title: "Andover Silver",
+                description: "Classic Andover profile in silver finish.",
                 usedOn: ["PCO"],
                 alternative: "277501653",
                 link: "https://larsonjuhl.co.uk/mouldings/larson-juhl-collections/ljc-andover-moulding-fsc-283502653",
@@ -1691,7 +1692,7 @@
             },
             {
                 code: "441227000",
-                title: "Essentials",
+                title: "Essentials White",
                 description: "Clean white finish from Essentials range.",
                 usedOn: [],
                 alternative: "440227000",
@@ -2573,6 +2574,78 @@
 
             const result = computeQuote();
             document.getElementById('grandTotal').textContent = result.valid ? `£${result.total.toFixed(2)}` : '£0.00';
+
+            syncStateToUrl();
+        }
+
+        // --- Shareable URL state ---
+        // Mirror the user's selections into ?param=value pairs so a copied URL
+        // restores the exact same configuration when reopened.
+        const URL_PARAM_MAP = {
+            artist: 'artist',
+            path: 'path',
+            mountType: 'mtype',
+            mount: 'mount',
+            glass: 'glass',
+            specialisedGlass: 'sg',
+            includeGlass: 'wg',
+            frameCode: 'frame',
+            height: 'h',
+            width: 'w'
+        };
+
+        let suppressUrlSync = false;
+
+        function syncStateToUrl() {
+            if (suppressUrlSync) return;
+            const params = new URLSearchParams();
+            Object.entries(URL_PARAM_MAP).forEach(([stateKey, queryKey]) => {
+                const v = quoteState[stateKey];
+                if (v === '' || v === 0 || v === false || v == null) return;
+                params.set(queryKey, String(v));
+            });
+            const qs = params.toString();
+            const newUrl = (qs ? `${location.pathname}?${qs}` : location.pathname) + location.hash;
+            history.replaceState(null, '', newUrl);
+        }
+
+        function loadStateFromUrl() {
+            const params = new URLSearchParams(location.search);
+            if (![...params.keys()].length) return;
+            suppressUrlSync = true;
+            try {
+                const get = (qp) => params.has(qp) ? params.get(qp) : null;
+                const toNum = (v) => {
+                    const n = parseFloat(v);
+                    return Number.isFinite(n) ? n : 0;
+                };
+
+                if (get('artist') != null) quoteState.artist = get('artist');
+                if (get('path') != null) quoteState.path = get('path');
+                if (get('mtype') != null) quoteState.mountType = get('mtype');
+                if (get('mount') != null) quoteState.mount = toNum(get('mount'));
+                if (get('glass') != null) quoteState.glass = get('glass');
+                if (get('sg') != null) quoteState.specialisedGlass = get('sg');
+                if (get('wg') != null) quoteState.includeGlass = get('wg') === '1' || get('wg') === 'true';
+                if (get('frame') != null) quoteState.frameCode = get('frame');
+                if (get('h') != null) quoteState.height = toNum(get('h'));
+                if (get('w') != null) quoteState.width = toNum(get('w'));
+
+                // Mirror state onto the form controls so the UI matches.
+                document.getElementById('artistSelect').value = quoteState.artist || '';
+                document.getElementById('mountSelect').value = quoteState.mount ? String(quoteState.mount) : '';
+                document.getElementById('glassSelect').value = quoteState.glass || '';
+                document.getElementById('heightInput').value = quoteState.height || '';
+                document.getElementById('widthInput').value = quoteState.width || '';
+
+                // data-unglass active class isn't driven by renderCalculator,
+                // so we have to set it explicitly when restoring.
+                document.querySelectorAll('[data-unglass]').forEach(b => b.classList.remove('active'));
+                const unglassBtn = document.querySelector(`[data-unglass="${quoteState.includeGlass ? 'yes' : 'no'}"]`);
+                if (unglassBtn) unglassBtn.classList.add('active');
+            } finally {
+                suppressUrlSync = false;
+            }
         }
 
         const MOUNT_IMAGES = {
@@ -2829,7 +2902,8 @@
 
         // (upgrade reset is handled by the unified resetCalc handler above)
 
-        // Initial render
+        // Initial render — first hydrate from URL so shared links restore state.
+        loadStateFromUrl();
         renderCalculator();
 
         // PDF Export
