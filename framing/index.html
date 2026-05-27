@@ -2409,7 +2409,11 @@
             const minDepth = getRequiredDepth();
             const isBoxCanvas = quoteState.artist === 'BOX_CANVAS';
             const frames = Object.entries(framePricing)
-                .filter(([code, data]) => data.rebate >= minDepth && (!isBoxCanvas || BOX_CANVAS_FRAMES.includes(code)))
+                .filter(([code, data]) => {
+                    if (data.rebate < minDepth) return false;
+                    const isBoxCanvasFrame = BOX_CANVAS_FRAMES.includes(code);
+                    return isBoxCanvas ? isBoxCanvasFrame : !isBoxCanvasFrame;
+                })
                 .sort(([a], [b]) => a.localeCompare(b));
             select.innerHTML = '<option value="">Select a frame...</option>';
             frames.forEach(([code]) => {
