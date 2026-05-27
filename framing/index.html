@@ -1230,6 +1230,7 @@
                         <option value="BCN">BCN</option>
                         <option value="STL">STL</option>
                         <option value="JMQ">JMQ</option>
+                        <option value="BOX_CANVAS">Box Canvas</option>
                         <option value="OTHER">Other</option>
                     </select>
                 </div>
@@ -1520,6 +1521,8 @@
             STL: { price: 250, label: 'STL Standard Framing (with mount)' },
             JMQ: { price: 300, label: 'JMQ Standard Framing (with mount)' }
         };
+
+        const BOX_CANVAS_FRAMES = ["407000127", "407000167", "513167000", "513287000", "L2789", "L1403"];
 
         const GLASS_RATE_PER_M = 32.89;
         const DAY_RATE_LOW = 130;
@@ -2404,8 +2407,9 @@
             const select = document.getElementById('frameSelectCalc');
             const current = quoteState.frameCode;
             const minDepth = getRequiredDepth();
+            const isBoxCanvas = quoteState.artist === 'BOX_CANVAS';
             const frames = Object.entries(framePricing)
-                .filter(([, data]) => data.rebate >= minDepth)
+                .filter(([code, data]) => data.rebate >= minDepth && (!isBoxCanvas || BOX_CANVAS_FRAMES.includes(code)))
                 .sort(([a], [b]) => a.localeCompare(b));
             select.innerHTML = '<option value="">Select a frame...</option>';
             frames.forEach(([code]) => {
@@ -2498,14 +2502,16 @@
                 standardBlock.style.display = 'none';
             }
 
-            const showCustom = s.artist === 'OTHER' || s.path === 'custom';
+            const isBoxCanvas = s.artist === 'BOX_CANVAS';
+            const showCustom = s.artist === 'OTHER' || s.path === 'custom' || isBoxCanvas;
 
             const mountTypeBlock = document.getElementById('mountTypeBlock');
-            mountTypeBlock.style.display = showCustom ? 'block' : 'none';
+            const showMountType = showCustom && !isBoxCanvas;
+            mountTypeBlock.style.display = showMountType ? 'block' : 'none';
             document.querySelectorAll('[data-mounttype]').forEach(b => {
                 b.classList.toggle('active', b.dataset.mounttype === s.mountType);
             });
-            if (showCustom) {
+            if (showMountType) {
                 step++;
                 document.getElementById('mountStepNum').textContent = step - 1;
             }
@@ -2700,7 +2706,16 @@
 
         document.getElementById('artistSelect').addEventListener('change', (e) => {
             quoteState.artist = e.target.value;
-            if (quoteState.artist === 'OTHER') {
+            if (quoteState.artist === 'BOX_CANVAS') {
+                quoteState.path = 'custom';
+                quoteState.mountType = 'unmounted';
+                quoteState.mount = 0;
+                quoteState.glass = '';
+                quoteState.specialisedGlass = '';
+                quoteState.frameCode = '';
+                document.getElementById('mountSelect').value = '';
+                document.getElementById('glassSelect').value = '';
+            } else if (quoteState.artist === 'OTHER') {
                 quoteState.path = 'custom';
             } else if (standardQuotes[quoteState.artist]) {
                 quoteState.path = '';
