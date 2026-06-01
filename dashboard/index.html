@@ -401,6 +401,78 @@
             transform: scale(1.2);
         }
 
+        /* Carousel Playback Controls */
+        .carousel-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .carousel-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+            padding: 0;
+        }
+
+        .carousel-btn:hover {
+            background: var(--accent-gold);
+            border-color: var(--accent-gold);
+            color: #1a1a1a;
+        }
+
+        .carousel-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            stroke: none;
+        }
+
+        .carousel-arrow {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+            padding: 0;
+        }
+
+        .carousel-arrow:hover {
+            background: var(--accent-gold);
+            border-color: var(--accent-gold);
+            color: #1a1a1a;
+        }
+
+        .carousel-arrow svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .carousel-controls.paused .carousel-arrow {
+            display: flex;
+        }
+
         /* Gallery Grid Container */
         .gallery-carousel {
             flex: 1;
@@ -1604,7 +1676,18 @@
         <main class="gallery-section">
             <div class="section-header">
                 <h2 class="section-title">Gallery Breakdown</h2>
-                <div class="page-indicator" id="pageIndicator"></div>
+                <div class="carousel-controls" id="carouselControls">
+                    <button class="carousel-arrow" id="prevPageBtn" aria-label="Previous page" title="Previous">
+                        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <button class="carousel-btn" id="pausePlayBtn" aria-label="Pause autoscroll" title="Pause autoscroll">
+                        <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+                    </button>
+                    <button class="carousel-arrow" id="nextPageBtn" aria-label="Next page" title="Next">
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <div class="page-indicator" id="pageIndicator"></div>
+                </div>
             </div>
             <div class="gallery-carousel" id="galleryCarousel"></div>
         </main>
@@ -1700,6 +1783,7 @@
         let leagueScrollTimer = null;
         let leagueScrollDirection = 1;
         let leagueScrollPosition = 0;
+        let isPaused = false;
 
         function formatCurrency(value) {
             return new Intl.NumberFormat('en-GB', {
@@ -1960,6 +2044,7 @@
                 let dir = 1;
 
                 const timer = setInterval(() => {
+                    if (isPaused) return;
                     const maxScroll = list.scrollHeight - container.clientHeight;
                     if (maxScroll <= 0) return;
 
@@ -2110,6 +2195,7 @@
 
             // Progress bar animation
             progressTimer = setInterval(() => {
+                if (isPaused) return;
                 progress += (100 / (PAGE_DURATION / 100));
                 if (progress > 100) progress = 0;
                 progressEl.style.width = progress + '%';
@@ -2117,8 +2203,37 @@
 
             // Page transition
             pageTimer = setInterval(() => {
+                if (isPaused) return;
                 goToPage((currentPage + 1) % totalPages);
             }, PAGE_DURATION);
+        }
+
+        const PAUSE_ICON = '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>';
+        const PLAY_ICON = '<polygon points="7 4 20 12 7 20 7 4"/>';
+
+        function setPaused(paused) {
+            isPaused = paused;
+            const controls = document.getElementById('carouselControls');
+            const btn = document.getElementById('pausePlayBtn');
+            const svg = btn.querySelector('svg');
+
+            controls.classList.toggle('paused', paused);
+
+            if (paused) {
+                svg.innerHTML = PLAY_ICON;
+                btn.setAttribute('aria-label', 'Resume autoscroll');
+                btn.setAttribute('title', 'Resume autoscroll');
+            } else {
+                svg.innerHTML = PAUSE_ICON;
+                btn.setAttribute('aria-label', 'Pause autoscroll');
+                btn.setAttribute('title', 'Pause autoscroll');
+                // Reset progress so the resumed page gets a full duration
+                document.getElementById('progressFill').style.width = '0%';
+            }
+        }
+
+        function manualGoToPage(pageIndex) {
+            goToPage((pageIndex + totalPages) % totalPages);
         }
 
         function goToPage(pageIndex) {
@@ -2441,6 +2556,17 @@
         // Enter key on password field
         document.getElementById('passwordInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') submitPassword();
+        });
+
+        // Carousel playback controls (web/desktop)
+        document.getElementById('pausePlayBtn').addEventListener('click', () => {
+            setPaused(!isPaused);
+        });
+        document.getElementById('prevPageBtn').addEventListener('click', () => {
+            if (isPaused) manualGoToPage(currentPage - 1);
+        });
+        document.getElementById('nextPageBtn').addEventListener('click', () => {
+            if (isPaused) manualGoToPage(currentPage + 1);
         });
 
         // Initialize
