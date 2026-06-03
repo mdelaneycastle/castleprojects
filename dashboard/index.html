@@ -807,6 +807,32 @@
             transition: transform 0.5s ease-out;
         }
 
+        /* When paused, allow manual scrolling of league tables */
+        .league-container.scrollable {
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-gold) transparent;
+        }
+
+        .league-container.scrollable .league-list {
+            position: relative;
+            transform: none !important;
+            transition: none;
+        }
+
+        .league-container.scrollable::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .league-container.scrollable::-webkit-scrollbar-thumb {
+            background: var(--accent-gold);
+            border-radius: 4px;
+        }
+
+        .league-container.scrollable::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
         .league-item {
             display: flex;
             align-items: center;
@@ -2040,19 +2066,19 @@
             document.querySelectorAll('.league-section').forEach(section => {
                 const container = section.querySelector('.league-container');
                 const list = section.querySelector('.league-list');
-                let pos = 0;
-                let dir = 1;
+                if (list._scrollPos === undefined) list._scrollPos = 0;
+                if (list._scrollDir === undefined) list._scrollDir = 1;
 
                 const timer = setInterval(() => {
                     if (isPaused) return;
                     const maxScroll = list.scrollHeight - container.clientHeight;
                     if (maxScroll <= 0) return;
 
-                    pos += dir * 1;
-                    if (pos >= maxScroll) { pos = maxScroll; dir = -1; }
-                    else if (pos <= 0) { pos = 0; dir = 1; }
+                    list._scrollPos += list._scrollDir * 1;
+                    if (list._scrollPos >= maxScroll) { list._scrollPos = maxScroll; list._scrollDir = -1; }
+                    else if (list._scrollPos <= 0) { list._scrollPos = 0; list._scrollDir = 1; }
 
-                    list.style.transform = `translateY(-${pos}px)`;
+                    list.style.transform = `translateY(-${list._scrollPos}px)`;
                 }, 50);
 
                 leagueScrollers.push(timer);
@@ -2211,6 +2237,25 @@
         const PAUSE_ICON = '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>';
         const PLAY_ICON = '<polygon points="7 4 20 12 7 20 7 4"/>';
 
+        function setLeagueScrollable(scrollable) {
+            document.querySelectorAll('.league-section').forEach(section => {
+                const container = section.querySelector('.league-container');
+                const list = section.querySelector('.league-list');
+
+                if (scrollable) {
+                    // Hand the current auto-scroll position over to native scrolling
+                    const pos = list._scrollPos || 0;
+                    container.classList.add('scrollable');
+                    container.scrollTop = pos;
+                } else {
+                    // Sync auto-scroll back to wherever the user manually scrolled to
+                    list._scrollPos = container.scrollTop;
+                    container.classList.remove('scrollable');
+                    list.style.transform = `translateY(-${list._scrollPos}px)`;
+                }
+            });
+        }
+
         function setPaused(paused) {
             isPaused = paused;
             const controls = document.getElementById('carouselControls');
@@ -2218,6 +2263,7 @@
             const svg = btn.querySelector('svg');
 
             controls.classList.toggle('paused', paused);
+            setLeagueScrollable(paused);
 
             if (paused) {
                 svg.innerHTML = PLAY_ICON;
