@@ -3,13 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artwork Preview</title>
+    <title>Artwork Preview — Castle Fine Art</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="app-container">
         <header class="app-header">
-            <h1>Artwork Preview</h1>
+            <div class="brand">
+                <a class="wordmark" href="https://www.castlefineart.com" aria-label="Castle Fine Art">
+                    <span class="wordmark-castle">CASTLE</span><span class="wordmark-fineart">FINE ART</span>
+                </a>
+                <span class="strapline">Your World, Our Art</span>
+            </div>
+            <div class="page-title">
+                <h1>Artwork Preview</h1>
+                <p class="page-subtitle">Visualise a piece in situ before it hangs on the wall</p>
+            </div>
         </header>
 
         <main class="main-content">
@@ -22,7 +31,7 @@
                         <input type="file" id="artwork-input" accept="image/*" hidden>
                         <label for="artwork-input" class="upload-label">
                             <span class="upload-icon">+</span>
-                            <span>Click or drag to upload</span>
+                            <span class="upload-text">Click or drag to upload</span>
                         </label>
                     </div>
                     <div class="artwork-preview-thumb" id="artwork-thumb"></div>
@@ -32,11 +41,12 @@
                 <section class="control-section size-section">
                     <h2>Artwork Size</h2>
                     <div class="size-input-group">
-                        <label for="artwork-width">Width (cm):</label>
+                        <label for="artwork-width">Width (cm)</label>
                         <input type="number" id="artwork-width" min="1" max="500" step="1" placeholder="Enter width">
                     </div>
                     <div class="size-category" id="size-category">
-                        Category: <span>--</span>
+                        <em class="size-category-label">Category</em>
+                        <span>--</span>
                     </div>
                     <div class="orientation-toggle" id="orientation-toggle">
                         <button class="orientation-btn active" id="btn-wide">Wide</button>
@@ -53,15 +63,15 @@
                             <div class="wheel-center"></div>
                         </div>
                         <div class="rotation-value">
-                            <span id="rotation-degrees">135</span>&deg;
+                            <span id="rotation-degrees">135</span><span class="rotation-unit">&deg;</span>
                         </div>
                     </div>
                     <div class="shadow-slider">
-                        <label for="shadow-distance">Shadow Distance:</label>
+                        <label for="shadow-distance">Shadow Distance</label>
                         <input type="range" id="shadow-distance" min="0" max="100" value="40">
                     </div>
                     <div class="shadow-slider">
-                        <label for="shadow-opacity">Shadow Intensity:</label>
+                        <label for="shadow-opacity">Shadow Intensity</label>
                         <input type="range" id="shadow-opacity" min="0" max="100" value="50">
                     </div>
                 </section>
@@ -82,8 +92,10 @@
                 <div class="canvas-container" id="canvas-container">
                     <canvas id="preview-canvas"></canvas>
                     <div class="placeholder-message" id="placeholder-message">
+                        <span class="placeholder-mark">+</span>
                         Upload an artwork and enter its width to preview
                     </div>
+                    <span class="colour-bar" aria-hidden="true"></span>
                 </div>
                 <div class="preview-info">
                     <span id="background-info">No background loaded</span>
