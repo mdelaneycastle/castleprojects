@@ -233,6 +233,28 @@ dialog{border:0;padding:0;background:transparent;max-width:96vw;max-height:96vh}
 dialog::backdrop{background:rgba(10,9,13,.86)}
 dialog img{max-height:92vh;width:auto;border-radius:6px}
 dialog .close{position:fixed;top:14px;right:14px;z-index:5}
+
+/* ─── Versions ────────────────────────────────────────────────────────── */
+.viewing{background:var(--retail-bg);color:var(--retail-ink);border-bottom:1px solid var(--line)}
+.viewing[hidden]{display:none}
+.viewing .wrap{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;padding-block:9px;font-size:13.5px}
+.viewing b{font-weight:600}
+.viewing .spacer{flex:1 1 auto}
+body.frozen .card{cursor:default}
+body.frozen .addbtn{display:none}
+dialog.versions{background:var(--surface);color:var(--ink);border-radius:var(--r);box-shadow:var(--shadow-lift);width:min(560px,calc(100vw - 32px));padding:20px 22px}
+dialog.versions::backdrop{background:rgba(10,9,13,.5)}
+.versions h3{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:19px;margin:0 0 4px}
+.versions p.hint{margin:0 0 14px;color:var(--muted);font-size:13px}
+.vlist{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow-y:auto;margin-bottom:14px}
+.vrow{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 10px;background:var(--surface-2)}
+.vrow .vt{flex:1 1 auto;min-width:0}
+.vrow .vt b{display:block;font-size:13.5px;font-weight:600;overflow-wrap:anywhere}
+.vrow .vt span{font-size:12px;color:var(--faint)}
+.vrow .btn{height:30px;padding:0 10px;font-size:12.5px}
+.vsave{display:flex;gap:8px}
+.vsave input{flex:1 1 auto;min-width:0;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);padding:0 10px;font:inherit;font-size:13.5px;color:var(--ink)}
+.versions .foot{display:flex;justify-content:flex-end;margin-top:14px}
 .transcript{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:6px 4px;max-height:460px;overflow-y:auto}
 .turn{display:grid;grid-template-columns:52px 74px 1fr;gap:10px;padding:8px 12px;border-radius:var(--r-sm);align-items:baseline}
 .turn:hover{background:var(--surface-2)}
@@ -297,7 +319,17 @@ footer.page{border-top:1px solid var(--line);margin-top:50px;padding-block:22px 
     <button class="btn icon" id="theme" title="Switch theme" aria-label="Switch theme">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.2 9.6A5.6 5.6 0 0 1 6.4 2.8 5.6 5.6 0 1 0 13.2 9.6Z"/></svg>
     </button>
+    <button class="btn" id="versions">Versions</button>
     <button class="btn" id="export">Export</button>
+  </div>
+</div>
+
+<div class="viewing" id="viewing" hidden>
+  <div class="wrap">
+    <span>Viewing <b id="viewingName"></b> — read-only. Nothing you see here has changed the shared board.</span>
+    <span class="spacer"></span>
+    <button class="btn" id="viewRestore">Restore this version</button>
+    <button class="btn" id="viewBack">Back to the live board</button>
   </div>
 </div>
 
@@ -405,6 +437,18 @@ footer.page{border-top:1px solid var(--line);margin-top:50px;padding-block:22px 
 </main>
 
 <dialog id="lightbox"><button class="btn close" id="lbClose">Close</button><img id="lbImg" alt=""></dialog>
+
+<dialog class="versions" id="versionsDlg">
+  <h3>Versions</h3>
+  <p class="hint">View any version read-only, or restore it to the shared board. Restoring saves the board as it is
+    first, so a restore can always be undone from this list.</p>
+  <div class="vlist" id="vlist"></div>
+  <form class="vsave" id="vsave">
+    <input id="vname" placeholder="Name this layout, e.g. After Monday's review" aria-label="Version name" maxlength="120">
+    <button class="btn" type="submit">Save current</button>
+  </form>
+  <div class="foot"><button class="btn" id="vclose">Close</button></div>
+</dialog>
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -671,14 +715,19 @@ const BY_ID = Object.fromEntries(ACTS.map(a => [a.id, a]));
 
 /* ═══ Persisted state ══════════════════════════════════════════════════ */
 const KEY = 'cfa-operating-model-v1';
-let S = {moves:{}, flags:{}, added:[], qs:{}, notes:{}};
-try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch(e){}
+const blank = () => ({moves:{}, flags:{}, added:[], qs:{}, notes:{}});
+// LIVE is the shared board. S is what the page shows: LIVE itself, or a read-only version
+// (the original workshop model, or a saved one) while someone is looking at it.
+let LIVE = blank();
+try { const raw = localStorage.getItem(KEY); if (raw) LIVE = Object.assign(LIVE, JSON.parse(raw)); } catch(e){}
+let S = LIVE;
+const frozen = () => S !== LIVE;
 let saveTimer = null;
 // The browser copy is a cache so the page opens instantly; the shared database is the record.
 function save(){
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(S)); }
+    try { localStorage.setItem(KEY, JSON.stringify(LIVE)); }
     catch(e){ if (!DB) note('Could not save — this browser is blocking storage'); }
   }, 180);
 }
@@ -701,21 +750,25 @@ async function write(table, row){
 // Each edit writes just its own row, so people editing different cards never collide.
 function sync(kind, id){
   save();
-  if (kind === 'task') write('task_changes', {task_id:id, owner:S.moves[id] || null, status:S.flags[id] || null});
-  if (kind === 'added'){ const a = custom(id); write('added_tasks', {id, name:a.name, lead:a.lead}); }
-  if (kind === 'decision') write('decisions', {id, status:S.qs[id] || 'open', note:S.notes[id] || null});
+  if (kind === 'task') write('task_changes', {task_id:id, owner:LIVE.moves[id] || null, status:LIVE.flags[id] || null});
+  if (kind === 'added'){ const a = LIVE.added.find(x => x.id === id); write('added_tasks', {id, name:a.name, lead:a.lead}); }
+  if (kind === 'decision') write('decisions', {id, status:LIVE.qs[id] || 'open', note:LIVE.notes[id] || null});
 }
 const noteTimers = {};
 function syncNote(id){ save(); clearTimeout(noteTimers[id]); noteTimers[id] = setTimeout(() => sync('decision', id), 600); }
 
 function applyTask(r){
-  if (r.owner) S.moves[r.task_id] = r.owner; else delete S.moves[r.task_id];
-  if (r.status) S.flags[r.task_id] = r.status; else delete S.flags[r.task_id];
+  if (r.owner) LIVE.moves[r.task_id] = r.owner; else delete LIVE.moves[r.task_id];
+  if (r.status) LIVE.flags[r.task_id] = r.status; else delete LIVE.flags[r.task_id];
 }
-function applyAdded(r){ if (!custom(r.id)) S.added.push(addedFromRow(r)); }
+// An added task is never deleted, only marked removed, so restoring a version can bring it back.
+function applyAdded(r){
+  LIVE.added = LIVE.added.filter(a => a.id !== r.id);
+  if (!r.removed) LIVE.added.push(addedFromRow(r));
+}
 function applyDecision(r){
-  S.qs[r.id] = r.status;
-  if (r.note) S.notes[r.id] = r.note; else delete S.notes[r.id];
+  LIVE.qs[r.id] = r.status;
+  if (r.note) LIVE.notes[r.id] = r.note; else delete LIVE.notes[r.id];
 }
 // Re-render after someone else's change, without yanking a card mid-drag or a notes box mid-sentence.
 let remoteTimer = null;
@@ -736,7 +789,8 @@ async function connect(){
     DB.from('task_changes').select('*'), DB.from('added_tasks').select('*').order('created_at'), DB.from('decisions').select('*')]);
   const err = t.error || a.error || d.error;
   if (err){ console.error(err); status('Offline — changes kept in this browser only'); note('Could not reach the shared board — ' + err.message); return; }
-  S = {moves:{}, flags:{}, added:[], qs:{}, notes:{}};
+  const wasFrozen = frozen();
+  LIVE = blank(); if (!wasFrozen) S = LIVE;
   t.data.forEach(applyTask); a.data.forEach(applyAdded); d.data.forEach(applyDecision);
   save(); renderAll();
   status('Live — shared with everyone who opens this page');
@@ -871,7 +925,7 @@ function cardHTML(a){
   return '<article class="card fam-'+df(own)+(moved?' moved':'')+'" data-id="'+a.id+'" tabindex="0">'
     + '<button class="flag" data-s="'+flag+'" title="Mark agreed, or one to discuss"></button>'
     + '<span class="t">'+esc(a.name)+'</span>'
-    + '<div class="m"><select class="dept" aria-label="Department">'+opts+'</select>'
+    + '<div class="m"><select class="dept" aria-label="Department"'+(frozen()?' disabled':'')+'>'+opts+'</select>'
     + (a.people && a.people.length ? '<span class="who fam-'+df(own)+'">'+a.people.map(esc).join(' &middot; ')+'</span>' : '')
     + '<span class="src">'+(a.custom ? 'added' : a.support ? 'SUP · '+a.group : 'P'+a.phase+' · '+String(a.group).padStart(2,'0'))+'</span></div>'
     + '</article>';
@@ -881,7 +935,7 @@ function cardHTML(a){
 let drag = null;
 $('#board').addEventListener('pointerdown', e => {
   const card = e.target.closest('.card');
-  if (!card || e.target.closest('select, .flag') || e.button > 0) return;
+  if (frozen() || !card || e.target.closest('select, .flag') || e.button > 0) return;
   const r = card.getBoundingClientRect();
   drag = {card, id:card.dataset.id, x0:e.clientX, y0:e.clientY, dx:e.clientX-r.left, dy:e.clientY-r.top, live:false};
   card.setPointerCapture(e.pointerId);
@@ -926,11 +980,12 @@ $('#board').addEventListener('pointercancel', () => {
   drag = null;
 });
 $('#board').addEventListener('change', e => {
-  const sel = e.target.closest('.dept'); if (!sel) return;
+  const sel = e.target.closest('.dept'); if (!sel || frozen()) return;
   const id = sel.closest('.card').dataset.id;
   S.moves[id] = sel.value; sync('task', id); renderLoad(); renderFlow();
 });
 $('#board').addEventListener('click', e => {
+  if (frozen()) return;
   const flag = e.target.closest('.flag');
   if (flag){
     const id = flag.closest('.card').dataset.id;
@@ -994,23 +1049,23 @@ function renderMatrix(){
 function renderQuestions(){
   $('#questions').innerHTML = QUESTIONS.map((q,i) => {
     const st = S.qs[q.id] || 'open';
-    const b = (v,l) => '<button data-q="'+q.id+'" data-v="'+v+'" aria-pressed="'+(st===v)+'">'+l+'</button>';
+    const b = (v,l) => '<button data-q="'+q.id+'" data-v="'+v+'" aria-pressed="'+(st===v)+'"'+(frozen()?' disabled':'')+'>'+l+'</button>';
     return '<article class="q fam-'+q.fam+'">'
       + '<span class="qn">BOUNDARY '+String(i+1).padStart(2,'0')+'</span>'
       + '<h4>'+esc(q.t)+'</h4>'
       + '<div class="tension">'+q.sides.map(s => '<span class="chip fam-'+q.fam+'">'+esc(s)+'</span>').join('<span>vs</span>')+'</div>'
       + '<p>'+esc(q.b)+'</p>'
       + '<div class="seg">'+b('open','Open')+b('agreed','Agreed')+b('parked','Parked')+'</div>'
-      + '<textarea data-note="'+q.id+'" placeholder="Decision, owner, date…">'+esc(S.notes[q.id]||'')+'</textarea>'
+      + '<textarea data-note="'+q.id+'" placeholder="Decision, owner, date…"'+(frozen()?' readonly':'')+'>'+esc(S.notes[q.id]||'')+'</textarea>'
       + '</article>';
   }).join('');
 }
 $('#questions').addEventListener('click', e => {
-  const b = e.target.closest('[data-q]'); if (!b) return;
+  const b = e.target.closest('[data-q]'); if (!b || frozen()) return;
   S.qs[b.dataset.q] = b.dataset.v; sync('decision', b.dataset.q); renderQuestions();
 });
 $('#questions').addEventListener('input', e => {
-  const t = e.target.closest('[data-note]'); if (!t) return;
+  const t = e.target.closest('[data-note]'); if (!t || frozen()) return;
   S.notes[t.dataset.note] = t.value; syncNote(t.dataset.note);
 });
 
@@ -1089,11 +1144,107 @@ $('#export').addEventListener('click', () => {
   const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿' + csv], {type:'text/csv;charset=utf-8'}));
-  a.download = 'castle-fine-art-operating-model.csv';
+  a.download = 'castle-fine-art-operating-model' + (frozen() ? '-' + viewing.label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : '') + '.csv';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   note('Exported ' + (rows.length - 1) + ' rows');
 });
+
+/* ═══ Versions ═════════════════════════════════════════════════════════
+   The original workshop model is the data baked into this page, so it can never be lost:
+   it is simply the board with no moves, statuses, added tasks or notes. Saved versions are
+   whole copies of the board, kept in the snapshots table (or this browser, offline). */
+const VKEY = KEY + ':versions';
+const clone = x => JSON.parse(JSON.stringify(x));
+const ORIGINAL = {id:'original', label:'Original workshop model', state:blank()};
+let listed = [];
+function summary(st){
+  const n = (k, one, many) => { const c = Array.isArray(st[k]) ? st[k].length : Object.keys(st[k] || {}).length; return c + ' ' + (c === 1 ? one : many); };
+  return n('moves','move','moves') + ' · ' + n('flags','status','statuses') + ' · ' + n('added','added task','added tasks');
+}
+function localVersions(){ try { return JSON.parse(localStorage.getItem(VKEY)) || []; } catch(e){ return []; } }
+async function loadVersions(){
+  if (!DB) return localVersions();
+  const {data, error} = await DB.from('snapshots').select('*').order('created_at', {ascending:false}).limit(60);
+  if (error){ console.error(error); note('Could not load saved versions — ' + error.message); return []; }
+  return data;
+}
+async function saveVersion(label){
+  const row = {label, state:clone(LIVE)};
+  if (!DB){
+    const all = localVersions();
+    all.unshift(Object.assign({id:'v' + Date.now().toString(36), created_at:new Date().toISOString()}, row));
+    try { localStorage.setItem(VKEY, JSON.stringify(all.slice(0, 60))); return true; }
+    catch(e){ note('Could not save the version — this browser is blocking storage'); return false; }
+  }
+  const {error} = await DB.from('snapshots').insert(row);
+  if (error){ console.error(error); note('Could not save the version — ' + error.message); return false; }
+  return true;
+}
+function view(v){
+  S = v.id === 'live' ? LIVE : clone(v.state);
+  S.added = S.added || [];
+  document.body.classList.toggle('frozen', frozen());
+  $('#viewing').hidden = !frozen();
+  $('#viewingName').textContent = v.label;
+  viewing = v;
+  renderAll();
+}
+let viewing = null;
+// Writes only the rows that differ, so a restore is a handful of ordinary edits that
+// everyone else's page picks up live.
+async function restoreTo(v){
+  if (!confirm('Restore “' + v.label + '” for everyone on the shared board?\n\nThe board as it is now is saved to Versions first, so you can undo this.')) return;
+  if (!await saveVersion('Board before restoring ' + (v.id === 'original' ? 'the original' : 'an earlier version'))) return;
+  const T = clone(v.state); T.added = T.added || [];
+  const tasks = [], added = [], decisions = [];
+  new Set([...Object.keys(LIVE.moves), ...Object.keys(LIVE.flags), ...Object.keys(T.moves), ...Object.keys(T.flags)]).forEach(id => {
+    if ((LIVE.moves[id] || null) !== (T.moves[id] || null) || (LIVE.flags[id] || null) !== (T.flags[id] || null))
+      tasks.push({task_id:id, owner:T.moves[id] || null, status:T.flags[id] || null});
+  });
+  LIVE.added.forEach(a => { if (!T.added.some(b => b.id === a.id)) added.push({id:a.id, name:a.name, lead:a.lead, removed:true}); });
+  T.added.forEach(a => { if (!LIVE.added.some(b => b.id === a.id)) added.push({id:a.id, name:a.name, lead:a.lead, removed:false}); });
+  QUESTIONS.forEach(q => {
+    if ((LIVE.qs[q.id] || 'open') !== (T.qs[q.id] || 'open') || (LIVE.notes[q.id] || null) !== (T.notes[q.id] || null))
+      decisions.push({id:q.id, status:T.qs[q.id] || 'open', note:T.notes[q.id] || null});
+  });
+  if (DB){
+    const res = await Promise.all([['task_changes', tasks], ['added_tasks', added], ['decisions', decisions]]
+      .filter(([, rows]) => rows.length).map(([t, rows]) => DB.from(t).upsert(rows)));
+    const err = res.find(r => r.error)?.error;
+    if (err){ console.error(err); note('Restore did not finish — ' + err.message + '. The earlier board is saved in Versions.'); return; }
+  }
+  LIVE = T; save();
+  view({id:'live'});
+  status(DB ? 'Live — shared with everyone who opens this page' : 'Changes are kept in this browser only');
+  note('Restored “' + v.label + '”');
+  $('#versionsDlg').close();
+}
+async function renderVersions(){
+  $('#vlist').innerHTML = '<div class="empty">Loading…</div>';
+  listed = [ORIGINAL].concat(await loadVersions());
+  const fmt = t => new Date(t).toLocaleString('en-GB', {dateStyle:'medium', timeStyle:'short'});
+  $('#vlist').innerHTML = listed.map((v,i) =>
+    '<div class="vrow"><div class="vt"><b>'+esc(v.label)+'</b><span>'
+    + (i === 0 ? 'All ' + ACTS.length + ' tasks where the workshop placed them — no moves, statuses or notes' : fmt(v.created_at) + ' · ' + summary(v.state))
+    + '</span></div><button class="btn" data-vview="'+i+'">View</button><button class="btn" data-vrestore="'+i+'">Restore</button></div>').join('')
+    + (listed.length === 1 ? '<div class="empty">No saved versions yet. Every restore saves one automatically.</div>' : '');
+}
+$('#versions').addEventListener('click', () => { $('#versionsDlg').showModal(); renderVersions(); });
+$('#vclose').addEventListener('click', () => $('#versionsDlg').close());
+$('#vlist').addEventListener('click', e => {
+  const b = e.target.closest('[data-vview], [data-vrestore]'); if (!b) return;
+  const v = listed[+(b.dataset.vview ?? b.dataset.vrestore)];
+  if (b.dataset.vview != null){ view(v); $('#versionsDlg').close(); window.scrollTo({top:0, behavior:'instant'}); }
+  else restoreTo(v);
+});
+$('#vsave').addEventListener('submit', async e => {
+  e.preventDefault();
+  const label = $('#vname').value.trim() || 'Saved ' + new Date().toLocaleString('en-GB', {dateStyle:'medium', timeStyle:'short'});
+  if (await saveVersion(label)){ $('#vname').value = ''; note('Saved “' + label + '”'); renderVersions(); }
+});
+$('#viewBack').addEventListener('click', () => view({id:'live'}));
+$('#viewRestore').addEventListener('click', () => viewing && restoreTo(viewing));
 
 function renderAll(){ renderLoad(); renderFlow(); renderBoard(); renderMatrix(); renderQuestions(); }
 renderAll();
